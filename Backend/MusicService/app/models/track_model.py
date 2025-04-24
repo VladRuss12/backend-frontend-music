@@ -7,5 +7,6 @@ class TrackModel(BaseMongoModel):
     album: Optional[str] = None
     genre: Optional[str] = None
     duration: Optional[int] = None  # Время трека в секундах
+    file_url: Optional[str] = None
     created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
 
