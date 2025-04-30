@@ -1,13 +1,19 @@
-from app.seeders.performer_seeder import PerformerSeeder
-from app.seeders.track_seeder import TrackSeeder
-from app.seeders.playlist_seeder import PlaylistSeeder
-from app.database import mongo
+from app.database.database import db
+from app.seeders.performer_seeder import performer_seeder
+from app.seeders.playlist_seeder import playlist_seeder
+from app.seeders.track_seeder import track_seeder
 
 def seed_all():
-    if mongo.db.performers.count_documents({}) == 0:
-        PerformerSeeder.seed()
-    if mongo.db.tracks.count_documents({}) == 0:
-        TrackSeeder.seed()
-    if mongo.db.playlists.count_documents({}) == 0:
-        PlaylistSeeder.seed()
+    session = db.session
 
+    print("Seeding performers...")
+    performers = performer_seeder(session)
+
+    print("Seeding tracks...")
+    tracks = track_seeder(session, performers)
+
+    print("Seeding playlists...")
+    playlist_seeder(session, tracks)
+
+    session.commit()
+    print("All seeders executed successfully.")

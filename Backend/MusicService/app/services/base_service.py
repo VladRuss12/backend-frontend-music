@@ -1,48 +1,76 @@
-from pydantic import ValidationError
+from marshmallow import Schema
+from flask import current_app
+from typing import Type, TypeVar, Optional
 
-from app.database import mongo
+from app.database.database import db
+
+T = TypeVar('T')  # SQLAlchemy модель
+S = TypeVar('S', bound=Schema)  # Marshmallow схема
 
 class BaseService:
-    model = None
-    collection_name = None
-
-    @classmethod
-    def get_collection(cls):
-        return getattr(mongo.db, cls.collection_name)
+    model: Type[T]
+    schema: Type[S]
 
     @classmethod
     def get_all(cls):
-        docs = cls.get_collection().find()
-        return [cls.model.from_mongo(doc) for doc in docs]
+        try:
+            db_session = db.session
+            results = db_session.query(cls.model).all()
+            return cls.schema(many=True).dump(results)
+        except Exception as e:
+            current_app.logger.exception(f"Error in get_all for {cls.model.__name__}: {str(e)}")
+            raise e
 
     @classmethod
-    def get_by_id(cls, object_id: str):
-        doc = cls.get_collection().find_one({"_id": mongo.to_object_id(object_id)})
-        return cls.model.from_mongo(doc) if doc else None
+    def get_by_id(cls, object_id):
+        try:
+            db_session = db.session
+            result = db_session.query(cls.model).filter(cls.model.id == object_id).first()
+            if result:
+                return cls.schema().dump(result)
+            return None
+        except Exception as e:
+            current_app.logger.error(f"Error in get_by_id for {object_id}: {str(e)}")
+            raise e
 
     @classmethod
     def create(cls, data: dict):
         try:
-            # Валидируем входящие данные
+            db_session = db.session
             model_instance = cls.model(**data)
-            validated_data = model_instance.dict(exclude_unset=True)
-
-            # Сохраняем в базу только валидные данные
-            result = cls.get_collection().insert_one(validated_data)
-            return str(result.inserted_id)
-
-        except ValidationError as e:
+            db_session.add(model_instance)
+            db_session.commit()
+            db_session.refresh(model_instance)
+            return cls.schema().dump(model_instance)
+        except Exception as e:
+            current_app.logger.error(f"Error in create: {str(e)}")
             raise e
 
     @classmethod
-    def update(cls, object_id: str, data: dict):
-        result = cls.get_collection().update_one(
-            {"_id": mongo.to_object_id(object_id)},
-            {"$set": data}
-        )
-        return result.modified_count
+    def update(cls, object_id, data: dict) -> Optional[dict]:
+        try:
+            db_session = db.session
+            obj = db_session.query(cls.model).filter(cls.model.id == object_id).first()
+            if obj:
+                for key, value in data.items():
+                    setattr(obj, key, value)
+                db_session.commit()
+                return cls.schema().dump(obj)
+            return None
+        except Exception as e:
+            current_app.logger.error(f"Error in update for {object_id}: {str(e)}")
+            raise e
 
     @classmethod
-    def delete(cls, object_id: str):
-        result = cls.get_collection().delete_one({"_id": mongo.to_object_id(object_id)})
-        return result.deleted_count
+    def delete(cls, object_id) -> bool:
+        try:
+            db_session = db.session
+            obj = db_session.query(cls.model).filter(cls.model.id == object_id).first()
+            if obj:
+                db_session.delete(obj)
+                db_session.commit()
+                return True
+            return False
+        except Exception as e:
+            current_app.logger.error(f"Error in delete for {object_id}: {str(e)}")
+            raise e

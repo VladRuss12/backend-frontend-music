@@ -2,7 +2,7 @@ import os
 
 from flask import Blueprint, request, jsonify
 from app.services.track_service import TrackService
-from app.services.s3_service import S3Service
+from app.services.wasabi_service import S3Service
 from app.routes.base_router import create_crud_routes  # Импортируем генератор CRUD
 
 track_bp = Blueprint("tracks", __name__, url_prefix="/tracks")

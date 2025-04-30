@@ -1,0 +1,5 @@
+WASABI_ACCESS_KEY = 'FIBEX7HMG55YQ1XP43HA'
+WASABI_SECRET_KEY = 'Vrz3F05HObnyAHreapg0PTHyuUqiOgBDPIcd0J9X'
+WASABI_BUCKET_NAME = 'track-storage'
+WASABI_ENDPOINT_URL = 'https://s3.eu-west-2.wasabisys.com'
+

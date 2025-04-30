@@ -1,37 +1,27 @@
+import uuid
 from faker import Faker
-from random import choice, randint, sample
-from app.services.performer_service import PerformerService
+from sqlalchemy.orm import Session
+from app.models.enums import PerformerType
+from app.models.performer_model import Performer
 
 fake = Faker()
 
-class PerformerSeeder:
-    @staticmethod
-    def seed():
-        artists = []
-        bands = []
-
-        # Создаём 10 артистов
-        for _ in range(10):
-            artist = {
-                "name": fake.name(),
-                "type": "artist",
-                "genre": fake.word(ext_word_list=["Pop", "Rock", "Jazz", "Electronic", "Indie"]),
-                "bio": fake.text(max_nb_chars=100)
-            }
-            artist_id = PerformerService.create(artist)
-            artist["id"] = artist_id
-            artists.append(artist)
-
-        # Создаём 3 группы с участниками из списка артистов
-        for _ in range(3):
-            members = sample(artists, k=randint(2, 4))
-            band = {
-                "name": fake.company() + " Band",
-                "type": "band",
-                "genre": fake.word(ext_word_list=["Rock", "Alternative", "Metal"]),
-                "bio": fake.text(max_nb_chars=100),
-                "members": [member["id"] for member in members]
-            }
-            PerformerService.create(band)
-
-        print("Перформеры успешно сгенерированы.")
+def performer_seeder(session: Session, count=10):
+    performers = []
+    for _ in range(count):
+        p_type = PerformerType.ARTIST if fake.boolean() else PerformerType.BAND
+        members = [{"name": fake.name()} for _ in range(fake.random_int(min=2, max=5))] if p_type == PerformerType.BAND else None
+        performer = Performer(
+            id=uuid.uuid4(),
+            name=fake.name() if p_type == PerformerType.ARTIST else fake.company(),
+            type=p_type,
+            genre=fake.word(),
+            bio=fake.text(),
+            avatar_url=fake.image_url(),
+            members=members,
+            created_at=fake.date_time_this_decade()
+        )
+        session.add(performer)
+        performers.append(performer)
+    session.commit()
+    return performers

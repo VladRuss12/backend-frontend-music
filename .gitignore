@@ -3,4 +3,4 @@
 **/__pycache__/
 **/requirements.txt
 /Backend/MusicService/.env
-/Backend/AiService/.env
+**/.env

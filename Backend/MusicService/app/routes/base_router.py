@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from werkzeug.exceptions import NotFound, BadRequest
 
 def create_crud_routes(service, url_prefix: str, name: str = None):
     # Используем url_prefix как имя, если не передано имя для blueprint
@@ -9,7 +10,7 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
     def get_all():
         try:
             items = service.get_all()
-            return jsonify([item.dict() for item in items])
+            return jsonify(items)  # <-- Убираем [item.dict() for item in items]
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -18,8 +19,10 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
         try:
             item = service.get_by_id(item_id)
             if not item:
-                return jsonify({'error': 'Not found'}), 404
-            return jsonify(item.dict())
+                raise NotFound(f"{service.model.__name__} with ID {item_id} not found.")
+            return jsonify(item)  # <-- Убираем item.dict()
+        except NotFound as e:
+            return jsonify({"error": str(e)}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -28,9 +31,11 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
         try:
             data = request.json
             if not data:
-                return jsonify({"error": "Missing data"}), 400
+                raise BadRequest("Missing data in request body.")
             new_id = service.create(data)
             return jsonify({'id': new_id}), 201
+        except BadRequest as e:
+            return jsonify({"error": str(e)}), 400
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -39,11 +44,13 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
         try:
             data = request.json
             if not data:
-                return jsonify({"error": "Missing data"}), 400
+                raise BadRequest("Missing data in request body.")
             updated = service.update(item_id, data)
             if not updated:
-                return jsonify({"error": "Update failed"}), 400
+                raise BadRequest(f"Update failed for {service.model.__name__} with ID {item_id}.")
             return jsonify({'updated': True})
+        except BadRequest as e:
+            return jsonify({"error": str(e)}), 400
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -52,8 +59,10 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
         try:
             deleted = service.delete(item_id)
             if not deleted:
-                return jsonify({"error": "Deletion failed"}), 400
+                raise BadRequest(f"Deletion failed for {service.model.__name__} with ID {item_id}.")
             return jsonify({'deleted': True})
+        except BadRequest as e:
+            return jsonify({"error": str(e)}), 400
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 

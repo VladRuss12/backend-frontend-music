@@ -1,25 +1,33 @@
-from app.services.playlist_service import PlaylistService
-from app.services.track_service import TrackService
+import uuid
 from faker import Faker
-from random import choice, randint, sample
+from sqlalchemy.orm import Session
+
+from app.models.playlist_model import Playlist
+from app.models.track_playlist import track_playlist
 
 fake = Faker()
-class PlaylistSeeder:
-    @staticmethod
-    def seed():
-        tracks = TrackService.get_all()
-        if not tracks:
-            print("❌ Нет треков для плейлистов.")
-            return
 
-        track_ids = [t.id for t in tracks]
+def playlist_seeder(session: Session, tracks, count=5):
+    playlists = []
+    for _ in range(count):
+        playlist = Playlist(
+            id=uuid.uuid4(),
+            name=fake.catch_phrase(),
+            user_id=uuid.uuid4(),
+            created_at=fake.date_time_this_year()
+        )
+        session.add(playlist)
+        playlists.append(playlist)
+    session.commit()
 
-        for _ in range(5):
-            playlist = {
-                "name": fake.sentence(nb_words=2).rstrip('.'),
-                "user_id": fake.uuid4(),  # можно заменить на существующих пользователей
-                "track_ids": sample(track_ids, k=randint(3, 7))
-            }
-            PlaylistService.create(playlist)
+    for playlist in playlists:
+        selected_tracks = fake.random_elements(elements=tracks, length=fake.random_int(min=3, max=10), unique=True)
+        for track in selected_tracks:
+            stmt = track_playlist.insert().values(
+                playlist_id=playlist.id,
+                track_id=track.id
+            )
+            session.execute(stmt)
 
-        print("✅ Плейлисты успешно сгенерированы.")
+    session.commit()
+    return playlists

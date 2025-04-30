@@ -1,10 +1,21 @@
-from app.models.__init__ import *
-from app.models.base import BaseMongoModel
+import uuid
+from datetime import datetime
+from sqlalchemy import Column, String, DateTime
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from app.models.base import Base
+from app.models.track_playlist import track_playlist
 
-class PlaylistModel(BaseMongoModel):
-    id: Optional[str] = None
-    name: str
-    user_id: str  # ID пользователя, который создал плейлист
-    track_ids: List[str]  # Список ID треков
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+class Playlist(Base):
+    __tablename__ = 'playlists'
 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    tracks = relationship(
+        "Track",
+        secondary=track_playlist,
+        back_populates="playlists"
+    )
