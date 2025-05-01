@@ -1,7 +1,9 @@
 import bcrypt
-from datetime import timedelta
 from app.utils.jwt import create_access_token, create_refresh_token
-from app.models.user_model import UserModel, get_user_collection
+from app.models.user_model import User
+from sqlalchemy.exc import SQLAlchemyError
+from app.schemas.user_schema import UserSchema
+from app.database.database import get_session
 
 
 def hash_password(password: str) -> str:
@@ -13,37 +15,55 @@ def verify_password(password: str, hashed: str) -> bool:
 
 
 def register_user(username: str, email: str, password: str, role: str = "user"):
-    user_col = get_user_collection()
-    if user_col.find_one({"email": email}):
-        raise ValueError("User already exists")
+    session = get_session()
+    try:
+        # Проверяем, существует ли пользователь с таким email
+        if session.query(User).filter(User.email == email).first():
+            raise ValueError("User already exists")
 
-    hashed_password = hash_password(password)
-    new_user = {
-        "username": username,
-        "email": email,
-        "password_hash": hashed_password,
-        "role": role,
-        "bio": "",
-        "avatar_url": "",
-        "is_active": True
-    }
-    result = user_col.insert_one(new_user)
-    return str(result.inserted_id)
+        hashed_password = hash_password(password)
+        new_user = User(
+            username=username,
+            email=email,
+            password_hash=hashed_password,
+            role=role,
+            bio="",
+            avatar_url="",
+            is_active=True
+        )
+        session.add(new_user)
+        session.commit()
+
+        return new_user.id  # Возвращаем ID нового пользователя
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return None
+    finally:
+        session.close()
 
 
 def authenticate_user(email: str, password: str):
-    user_col = get_user_collection()
-    user_data = user_col.find_one({"email": email})
-    if not user_data:
+    session = get_session()
+    try:
+        user = session.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+        if not verify_password(password, user.password_hash):
+            return None
+        return UserSchema().dump(user)
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Error: {e}")
         return None
-    if not verify_password(password, user_data["password_hash"]):
-        return None
-    user = UserModel.from_mongo(user_data)
-    return user
+    finally:
+        session.close()
 
 
-def create_tokens(user: UserModel):
-    user_data = {"sub": user.id, "role": user.role}
+def create_tokens(user: UserSchema):
+    user_data = {"sub": user["id"], "role": user["role"]}
     return {
         "access_token": create_access_token(user_data),
         "refresh_token": create_refresh_token(user_data),

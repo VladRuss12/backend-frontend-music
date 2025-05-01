@@ -6,9 +6,9 @@ from app.database.database import db, init_db
 from app.services.performer_service import PerformerService
 from app.services.playlist_service import PlaylistService
 from app.routes.base_router import create_crud_routes
-from app.routes.track_routes import track_bp
 from app.routes.wasabi_router import track_upload_bp
 from app.seeders.seed import seed_all
+from app.services.track_service import TrackService
 
 migrate = Migrate()
 
@@ -22,7 +22,7 @@ def create_app():
     # Регистрация маршрутов
     app.register_blueprint(create_crud_routes(PerformerService, "performers"))
     app.register_blueprint(create_crud_routes(PlaylistService, "playlists"))
-        app.register_blueprint(create_crud_routes(TrackService, "tracks"))
+    app.register_blueprint(create_crud_routes(TrackService, "tracks"))
     app.register_blueprint(track_upload_bp)
 
     @app.cli.command("seed")
@@ -31,3 +31,6 @@ def create_app():
         print("Database seeded successfully.")
 
     return app
+
+if __name__ == "__main__":
+    app.run(port=5002)

@@ -1,35 +1,24 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Literal, Optional
+import uuid
 from datetime import datetime
-from bson import ObjectId
+from sqlalchemy import Column, String, DateTime, Boolean, Enum
+from sqlalchemy.dialects.postgresql import UUID
+from enum import Enum as PyEnum
 
-from app.database import mongo
+from app.models.base import Base
 
+class UserRole(PyEnum):
+    ADMIN = "admin"
+    USER = "user"
 
-class UserModel(BaseModel):
-    id: str
-    username: str
-    email: EmailStr
-    password_hash: str  # добавлено поле для хранения хэша пароля
-    role: Literal["admin", "user", "artist"] = "user"
-    bio: Optional[str] = ""
-    avatar_url: Optional[str] = ""
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    is_active: bool = True  # например, можно использовать для бана или подтверждения
+class User(Base):
+    __tablename__ = 'users'
 
-    class Config:
-        validate_by_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str,
-            datetime: lambda v: v.isoformat()
-        }
-
-    @classmethod
-    def from_mongo(cls, mongo_dict):
-        mongo_dict['id'] = str(mongo_dict.pop('_id'))  # Преобразуем _id в id
-        return cls(**mongo_dict)
-
-
-def get_user_collection():
-    return mongo.db.users
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    username = Column(String, nullable=False, unique=True)
+    email = Column(String, nullable=False, unique=True)
+    password_hash = Column(String, nullable=False)
+    role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
+    bio = Column(String, default="")
+    avatar_url = Column(String, default="")
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_active = Column(Boolean, default=True)

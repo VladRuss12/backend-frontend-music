@@ -13,12 +13,12 @@ fileConfig(config.config_file_name)
 logger = logging.getLogger('alembic.env')
 
 
-# === ⬇️ ИМПОРТИРУЕМ МОДЕЛИ И БАЗУ ДАННЫХ ДЛЯ MIGRATION TARGET ===
+
 from app.database.database import db
 from app.models.performer_model import Performer
 from app.models.track_model import Track
 from app.models.playlist_model import Playlist
-# === ⬆️ ОБЯЗАТЕЛЬНО ИМПОРТИРУЙ ВСЕ МОДЕЛИ, ЧТОБЫ ALEMBIC ИХ УВИДЕЛ ===
+
 
 def get_engine():
     try:

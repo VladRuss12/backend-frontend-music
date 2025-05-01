@@ -19,7 +19,6 @@ def extract_sentences(text: str, max_sentences: int = 3) -> str:
 
 
 def query_huggingface(prompt: str) -> str:
-    # Инструкция для краткости
     instruction = (
         "Отвечай кратко — 2–3 предложениями. В конце предложи пользователю продолжить, если он захочет."
     )
@@ -28,7 +27,7 @@ def query_huggingface(prompt: str) -> str:
     payload = {
         "inputs": full_prompt,
         "parameters": {
-            "max_new_tokens": 120,        # Достаточная длина, чтобы не обрывать, но не перебор
+            "max_new_tokens": 120,
             "temperature": 0.7,
             "top_p": 0.95,
             "do_sample": True
@@ -43,7 +42,6 @@ def query_huggingface(prompt: str) -> str:
     try:
         response.raise_for_status()
         result = response.json()
-        # Чистим результат и обрезаем
         raw_text = result[0]['generated_text'].split("[/INST]")[-1].strip()
         trimmed = extract_sentences(raw_text, max_sentences=3)
         return trimmed + " Хочешь узнать подробнее?"

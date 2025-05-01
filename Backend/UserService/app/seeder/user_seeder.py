@@ -1,66 +1,39 @@
-from app.models.user_model import get_user_collection
-from app.database import mongo
-from app.services.auth_service import hash_password
 from datetime import datetime
+from faker import Faker
+from sqlalchemy.orm import Session
+from app.models.user_model import User, UserRole
+from app.services.auth_service import hash_password
 
+fake = Faker()
 
-def has_seed_run():
-    metadata_collection = mongo.db.app_metadata
-    return metadata_collection.find_one({"key": "seed_done"}) is not None
+def seed_users(db: Session):
+    for _ in range(10):  # Создаём 10 пользователей
+        username = fake.user_name()
+        email = fake.email()
+        password = fake.password()
+        bio = fake.sentence()
+        avatar_url = fake.image_url()
 
+        # Определяем случайную роль
+        role = fake.random_element([UserRole.ADMIN, UserRole.USER, UserRole.ARTIST])
 
-def set_seed_flag():
-    metadata_collection = mongo.db.app_metadata
-    metadata_collection.insert_one({"key": "seed_done", "value": True})
-
-
-def seed_users():
-    if has_seed_run():
-        print("Seeder already ran. Skipping...")
-        return
-
-    users = [
-        {
-            "username": "admin",
-            "email": "admin@example.com",
-            "role": "admin",
-            "password": "admin123",  # не забудь потом заменить или удалить
-            "bio": "This is the admin user.",
-            "avatar_url": "http://example.com/admin_avatar.jpg"
-        },
-        {
-            "username": "johndoe",
-            "email": "johndoe@example.com",
-            "role": "user",
-            "password": "johndoe123",
-            "bio": "This is a regular user.",
-            "avatar_url": "http://example.com/johndoe_avatar.jpg"
-        },
-        {
-            "username": "janedoe",
-            "email": "janedoe@example.com",
-            "role": "artist",
-            "password": "janedoe123",
-            "bio": "This is an artist.",
-            "avatar_url": "http://example.com/janedoe_avatar.jpg"
-        }
-    ]
-
-    user_collection = get_user_collection()
-
-    for user in users:
-        if not user_collection.find_one({"email": user["email"]}):
-            hashed_password = hash_password(user.pop("password"))
-            user_data = {
-                **user,
-                "password_hash": hashed_password,
-                "created_at": datetime.utcnow(),
-                "is_active": True
-            }
-            user_collection.insert_one(user_data)
-            print(f"User {user['username']} added.")
+        # Проверяем, существует ли уже пользователь с таким email
+        exists = db.query(User).filter_by(email=email).first()
+        if not exists:
+            user = User(
+                username=username,
+                email=email,
+                password_hash=hash_password(password),
+                role=role,
+                bio=bio,
+                avatar_url=avatar_url,
+                created_at=datetime.utcnow(),
+                is_active=True
+            )
+            db.add(user)
+            print(f"Added user {username}")
         else:
-            print(f"User {user['username']} already exists.")
+            print(f"User with email {email} already exists.")
 
-    set_seed_flag()
+    db.commit()
     print("Seeding complete.")
