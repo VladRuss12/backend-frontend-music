@@ -4,3 +4,13 @@
 **/requirements.txt
 /Backend/MusicService/.env
 **/.env
+**/app/database/config.py
+
+# Игнорируем файлы, которые могут быть созданы при работе Alembic
+**/migrations/.mypy_cache/
+**/migrations/.pytest_cache/
+**/migrations/*.pyc
+
+# Игнорируем временные файлы
+**/.log
+**/.tmp

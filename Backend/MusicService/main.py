@@ -22,7 +22,7 @@ def create_app():
     # Регистрация маршрутов
     app.register_blueprint(create_crud_routes(PerformerService, "performers"))
     app.register_blueprint(create_crud_routes(PlaylistService, "playlists"))
-    app.register_blueprint(track_bp)
+        app.register_blueprint(create_crud_routes(TrackService, "tracks"))
     app.register_blueprint(track_upload_bp)
 
     @app.cli.command("seed")
