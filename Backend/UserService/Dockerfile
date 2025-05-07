@@ -10,4 +10,4 @@ COPY . /app
 
 EXPOSE 5001
 
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]
+CMD ["python", "main.py"]

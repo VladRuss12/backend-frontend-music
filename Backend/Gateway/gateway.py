@@ -4,8 +4,8 @@ import requests
 app = Flask(__name__)
 
 USER_SERVICE_URL = "http://user-service:5001"
-MUSIC_SERVICE_URL = "http://music-service:5003"
-RECOMMENDATION_SERVICE_URL = "http://recommendation-service:5004"
+MUSIC_SERVICE_URL = "http://music-service:5002"
+RECOMMENDATION_SERVICE_URL = "http://recommendation-service:5003"
 CHAT_SERVICE_URL = "http://chat-service:5004"
 
 def proxy_request(service_url, prefix, path):

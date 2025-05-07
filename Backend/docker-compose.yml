@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # User Service
   user-service:
@@ -94,5 +92,8 @@ services:
       - music-service
       - recommendation-service
       - ai-service
-
+volumes:
+  user_db_data:
+  music_db_data:
+  recommendation_db_data:
 
