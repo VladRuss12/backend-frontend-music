@@ -16,6 +16,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Инициализация базы данных
     init_db(app)
     migrate.init_app(app, db)
 
@@ -25,12 +26,15 @@ def create_app():
     app.register_blueprint(create_crud_routes(TrackService, "tracks"))
     app.register_blueprint(track_upload_bp)
 
+    # Команда для наполнения базы данных
     @app.cli.command("seed")
     def seed_command():
-        seed_all()
+        with app.app_context():  # убедитесь, что контекст приложения активен
+            seed_all()
         print("Database seeded successfully.")
 
     return app
 
 if __name__ == "__main__":
+    app = create_app()  # Не забывайте создавать приложение перед запуском
     app.run(host="0.0.0.0", port=5002)

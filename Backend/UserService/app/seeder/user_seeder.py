@@ -15,7 +15,7 @@ def seed_users(db: Session):
         avatar_url = fake.image_url()
 
         # Определяем случайную роль
-        role = fake.random_element([UserRole.ADMIN, UserRole.USER, UserRole.ARTIST])
+        role = fake.random_element([UserRole.ADMIN, UserRole.USER])
 
         # Проверяем, существует ли уже пользователь с таким email
         exists = db.query(User).filter_by(email=email).first()
