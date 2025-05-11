@@ -1,50 +1,37 @@
-from flask import Flask, request, jsonify
-import requests
+from flask import Flask
+from auth import jwt_required
+from proxy import proxy_request
+from config import get_settings, SERVICE_MAP
 
 app = Flask(__name__)
+settings = get_settings()
 
-USER_SERVICE_URL = "http://user-service:5001"
-MUSIC_SERVICE_URL = "http://music-service:5002"
-RECOMMENDATION_SERVICE_URL = "http://recommendation-service:5003"
-CHAT_SERVICE_URL = "http://chat-service:5004"
-
-def proxy_request(service_url, prefix, path):
-    url = f"{service_url}/{prefix}/{path}"
-    resp = requests.request(
-        method=request.method,
-        url=url,
-        headers={key: value for key, value in request.headers if key.lower() != 'host'},
-        json=request.get_json(silent=True),
-        params=request.args
-    )
-    try:
-        return jsonify(resp.json()), resp.status_code
-    except Exception:
-        return resp.text, resp.status_code
+@app.route('/users', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/users/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required
+def users_proxy(path):
+    return proxy_request(SERVICE_MAP['/users'])
 
 
-@app.route("/users/<path:path>", methods=["GET", "POST", "PUT", "DELETE"])
-def proxy_user_service(path):
-    return proxy_request(USER_SERVICE_URL, "users", path)
+@app.route('/music', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/music/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required
+def music_proxy(path):
+    return proxy_request(SERVICE_MAP['/music'])
 
 
-@app.route("/music/<path:path>", methods=["GET", "POST", "PUT", "DELETE"])
-def proxy_music_service(path):
-    return proxy_request(MUSIC_SERVICE_URL, "", path)
+@app.route('/recommendations', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/recommendations/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required
+def recommendations_proxy(path):
+    return proxy_request(SERVICE_MAP['/recommendations'])
 
-@app.route("/recommendations/<path:path>", methods=["GET", "POST", "PUT", "DELETE"])
-def proxy_recommendation_service(path):
-    return proxy_request(RECOMMENDATION_SERVICE_URL, "", path)
 
-@app.route("/chat", methods=["POST"])
-def proxy_chat_service():
-    url = f"{CHAT_SERVICE_URL}/chat"
-    resp = requests.post(
-        url=url,
-        headers={key: value for key, value in request.headers if key.lower() != 'host'},
-        json=request.get_json(silent=True),
-    )
-    return jsonify(resp.json()), resp.status_code
+@app.route('/chat', methods=['POST'])
+@jwt_required
+def chat_proxy():
+    return proxy_request(SERVICE_MAP['/chat'])
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5005)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5005, debug=True)

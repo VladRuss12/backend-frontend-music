@@ -3,12 +3,23 @@ services:
   user-service:
     build: ./UserService
     container_name: user-service
+    env_file:
+      - .env
     ports:
       - "5001:5001"
     environment:
       - DATABASE_URL=postgresql+psycopg2://postgres:1111@user-db:5432/user_service_db
+      - FLASK_APP=main.py
     depends_on:
-      - user-db
+      user-db:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   user-db:
     image: postgres:15
@@ -22,6 +33,11 @@ services:
       - "5433:5432"
     volumes:
       - user_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Music Service
   music-service:
@@ -32,10 +48,19 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:1111@music-db:5432/music_service_db
     depends_on:
-      - music-db
+      music-db:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   music-db:
     image: postgres:15
+    container_name: music-db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -45,6 +70,11 @@ services:
       - "5434:5432"
     volumes:
       - music_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Recommendation Service
   recommendation-service:
@@ -55,10 +85,19 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:1111@recommendation_db:5432/recommendation_service_db
     depends_on:
-      - recommendation_db
+      recommendation_db:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   recommendation_db:
     image: postgres:15
+    container_name: recommendation_db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -68,6 +107,11 @@ services:
       - "5435:5432"
     volumes:
       - recommendation_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Ai Service
   ai-service:
@@ -75,14 +119,19 @@ services:
     container_name: ai-service
     ports:
       - "5004:5004"
-    # environment:
-    #   - DATABASE_URL=postgresql://postgres:1111@localhost:5432/recommendation_service_db
-    # depends_on:
-    #   - recommendation_db
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Gateway
   gateway:
     build: ./Gateway
+    container_name: gateway
+    env_file:
+      - .env
     ports:
       - "5005:5005"
     depends_on:
@@ -90,6 +139,12 @@ services:
       - music-service
       - recommendation-service
       - ai-service
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   user_db_data:

@@ -19,3 +19,4 @@ class Playlist(Base):
         secondary=track_playlist,
         back_populates="playlists"
     )
+    __searchable__ = ['name']

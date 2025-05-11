@@ -2,11 +2,17 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+# Копируем зависимости и устанавливаем их
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Копируем весь проект
 COPY . /app
 
+# Устанавливаем переменные окружения
+ENV FLASK_APP=app
 
-# Выполняем миграции при старте
-CMD flask db upgrade && python main.py --host=0.0.0.0 --port=5001
+EXPOSE 5001
+
+# Выполняем миграции и запускаем приложение
+CMD ["sh", "-c", "flask db upgrade && python main.py"]

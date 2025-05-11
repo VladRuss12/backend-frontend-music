@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from app.models.base import Base
 from app.models.enums import PerformerType
 
+
 class Performer(Base):
     __tablename__ = 'performers'
 
@@ -19,3 +20,5 @@ class Performer(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     tracks = relationship("Track", back_populates="performer")
+
+    __searchable__ = ['name', 'genre']
