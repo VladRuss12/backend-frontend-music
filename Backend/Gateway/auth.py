@@ -5,31 +5,40 @@ from config import get_settings
 
 settings = get_settings()
 
-def jwt_required(f):
+def jwt_required(roles=None):
+    def decorator(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            token = None
 
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = None
+            # Проверка заголовка Authorization
+            if 'Authorization' in request.headers:
+                try:
+                    token = request.headers['Authorization'].split(" ")[1]
+                except:
+                    return jsonify({"error": "Invalid token format"}), 401
 
-        # Проверяем заголовок Authorization
-        if 'Authorization' in request.headers:
+            if not token:
+                if roles:  # Если требуются роли — токен обязателен
+                    return jsonify({"error": "Token is missing"}), 401
+                else:
+                    return f(*args, **kwargs)  # Гостевой доступ
+
             try:
-                token = request.headers['Authorization'].split(" ")[1]
-            except:
-                return jsonify({"error": "Invalid token format"}), 401
+                # Декодирование токена
+                payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+                request.current_user = payload.get("sub")
+                user_role = payload.get("role")
 
-        if not token:
-            return jsonify({"error": "Token is missing"}), 401
+                # Если роль обязательна — проверим
+                if roles and user_role not in roles:
+                    return jsonify({"error": "Insufficient permissions"}), 403
 
-        try:
-            # Декодируем токен
-            payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
-            request.current_user = payload['sub']  # Добавляем user_id в request
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "Token has expired"}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "Invalid token"}), 401
+            except jwt.ExpiredSignatureError:
+                return jsonify({"error": "Token has expired"}), 401
+            except jwt.InvalidTokenError:
+                return jsonify({"error": "Invalid token"}), 401
 
-        return f(*args, **kwargs)
-
-    return decorated
+            return f(*args, **kwargs)
+        return decorated
+    return decorator

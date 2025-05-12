@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.auth_service import register_user, authenticate_user, create_tokens
-from app.database.database import get_session
-from sqlalchemy.orm import Session
+from app.database.database import db
 from sqlalchemy.exc import SQLAlchemyError
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -10,14 +9,14 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.json
-    session: Session = get_session()
+    session = db.session  # получаем сессию из db
 
     try:
         user_id = register_user(
             username=data["username"],
             email=data["email"],
             password=data["password"],
-            session=session
+            session=session  # передаем сессию
         )
         return jsonify({"message": "User registered", "user_id": user_id}), 201
     except ValueError as e:
@@ -30,10 +29,10 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
-    session: Session = get_session()
+    session = db.session  # получаем сессию из db
 
     try:
-        user = authenticate_user(data["email"], data["password"], session)
+        user = authenticate_user(data["email"], data["password"], session)  # передаем сессию
         if not user:
             return jsonify({"error": "Invalid credentials"}), 401
 

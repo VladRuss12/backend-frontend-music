@@ -31,9 +31,8 @@ def create_app():
 
     @app.cli.command("seed")
     def seed_command():
-        with app.app_context():
-            seed_all()
-        print("Database seeded successfully.")
+            seed_all(db.session)
+            print("Database seeded successfully.")
 
     return app
 

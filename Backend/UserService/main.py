@@ -1,8 +1,7 @@
-# app/__init__.py
 from flask import Flask
 
 from app.database.config import Config
-from app.database.database import init_db, get_session
+from app.database.database import init_db, db
 from app.routes.user_routes import bp as users_bp
 from app.routes.auth_routes import auth_bp
 from app.seeder.user_seeder import seed_users
@@ -21,8 +20,7 @@ app = create_app()
 @app.cli.command("seed")
 @with_appcontext
 def seed():
-    session = get_session()  # Получаем сессию из контекста
-    seed_users(session)  # Передаём сессию в сидер
+    seed_users(db.session)
     print("Сидер выполнен успешно!")
 
 if __name__ == "__main__":

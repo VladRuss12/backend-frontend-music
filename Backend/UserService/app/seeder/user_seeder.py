@@ -1,12 +1,24 @@
 from datetime import datetime
 from faker import Faker
-from sqlalchemy.orm import Session
+
+from app.database.database import db
 from app.models.user_model import User, UserRole
 from app.services.auth_service import hash_password
 
 fake = Faker()
 
-def seed_users(db: Session):
+
+# Проверка: есть ли уже пользователи в базе
+def users_already_seeded():
+    return db.session.query(User).count() > 0
+
+
+# Основная функция генерации сидеров пользователей
+def seed_users(session):
+    if users_already_seeded(session):
+        print("Пользователи уже существуют. Пропуск сидирования.")
+        return
+
     for _ in range(10):  # Создаём 10 пользователей
         username = fake.user_name()
         email = fake.email()
@@ -14,11 +26,10 @@ def seed_users(db: Session):
         bio = fake.sentence()
         avatar_url = fake.image_url()
 
-        # Определяем случайную роль
         role = fake.random_element([UserRole.ADMIN, UserRole.USER])
 
         # Проверяем, существует ли уже пользователь с таким email
-        exists = db.query(User).filter_by(email=email).first()
+        exists = session.query(User).filter_by(email=email).first()
         if not exists:
             user = User(
                 username=username,
@@ -30,10 +41,10 @@ def seed_users(db: Session):
                 created_at=datetime.utcnow(),
                 is_active=True
             )
-            db.add(user)
-            print(f"Added user {username}")
+            session.add(user)
+            print(f"Добавлен пользователь: {username}")
         else:
-            print(f"User with email {email} already exists.")
+            print(f"Пользователь с email {email} уже существует.")
 
-    db.commit()
-    print("Seeding complete.")
+    session.commit()
+    print("Пользователи успешно посеяны!")

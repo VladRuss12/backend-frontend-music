@@ -22,4 +22,4 @@ ENV FLASK_ENV=development
 EXPOSE 5002
 
 # Выполняем миграции через Flask и запускаем приложение
-CMD ["sh", "-c", "flask db upgrade && python main.py"]
+CMD ["sh", "-c", "flask db upgrade && flask seed && python main.py"]

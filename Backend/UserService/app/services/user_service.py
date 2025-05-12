@@ -1,11 +1,9 @@
 import uuid
 from sqlalchemy.exc import SQLAlchemyError
-from app.database.database import get_session
 from app.models.user_model import User
+from sqlalchemy.orm import Session
 
-
-def get_user_by_id(user_id: uuid.UUID) -> dict | None:
-    session = get_session()
+def get_user_by_id(user_id: uuid.UUID, session: Session) -> dict | None:
     try:
         user = session.query(User).filter_by(id=user_id).first()
         if user:
@@ -21,12 +19,8 @@ def get_user_by_id(user_id: uuid.UUID) -> dict | None:
     except SQLAlchemyError as e:
         print(f"[get_user_by_id] DB Error: {e}")
         return None
-    finally:
-        session.close()
 
-
-def get_user_by_email(email: str) -> dict | None:
-    session = get_session()
+def get_user_by_email(email: str, session: Session) -> dict | None:
     try:
         user = session.query(User).filter_by(email=email).first()
         if user:
@@ -42,12 +36,8 @@ def get_user_by_email(email: str) -> dict | None:
     except SQLAlchemyError as e:
         print(f"[get_user_by_email] DB Error: {e}")
         return None
-    finally:
-        session.close()
 
-
-def create_user(user_data: dict) -> uuid.UUID | None:
-    session = get_session()
+def create_user(user_data: dict, session: Session) -> uuid.UUID | None:
     try:
         user = User(
             username=user_data["username"],
@@ -64,12 +54,8 @@ def create_user(user_data: dict) -> uuid.UUID | None:
         session.rollback()
         print(f"[create_user] DB Error: {e}")
         return None
-    finally:
-        session.close()
 
-
-def update_user(user_id: uuid.UUID, updates: dict) -> bool:
-    session = get_session()
+def update_user(user_id: uuid.UUID, updates: dict, session: Session) -> bool:
     try:
         user = session.query(User).filter_by(id=user_id).first()
         if not user:
@@ -85,12 +71,8 @@ def update_user(user_id: uuid.UUID, updates: dict) -> bool:
         session.rollback()
         print(f"[update_user] DB Error: {e}")
         return False
-    finally:
-        session.close()
 
-
-def delete_user(user_id: uuid.UUID) -> bool:
-    session = get_session()
+def delete_user(user_id: uuid.UUID, session: Session) -> bool:
     try:
         user = session.query(User).filter_by(id=user_id).first()
         if not user:
@@ -102,5 +84,3 @@ def delete_user(user_id: uuid.UUID) -> bool:
         session.rollback()
         print(f"[delete_user] DB Error: {e}")
         return False
-    finally:
-        session.close()

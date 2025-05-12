@@ -9,5 +9,3 @@ def init_db(app):
     migrate.init_app(app, db)
 
 
-def get_session():
-    return db.session
