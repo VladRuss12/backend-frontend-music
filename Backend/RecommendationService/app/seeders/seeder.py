@@ -1,7 +1,7 @@
 from app.models.history_model import ListeningHistory
-from listening_history_seeder import generate_listening_history_seed
-from like_seeder import generate_like_seed
-from recommendation_seeder import generate_recommendation_seed
+from app.seeders.listening_history_seeder import generate_listening_history_seed
+from app.seeders.like_seeder import generate_like_seed
+from app.seeders.recommendation_seeder import generate_recommendation_seed
 from app.database.database import db
 
 def check_if_seeds_exist():

@@ -1,6 +1,8 @@
 from functools import wraps
 from flask import request, jsonify
+
 from app.utils.jwt import get_user_from_token
+
 
 def role_required(allowed_roles):
     def decorator(f):

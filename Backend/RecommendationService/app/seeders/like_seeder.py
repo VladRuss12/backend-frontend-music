@@ -3,7 +3,7 @@ from random import choice
 from faker import Faker
 from app.models.history_model import Like
 from app.database.database import db
-from .utils import get_user_id, get_track_id
+from app.seeders.utils import get_user_id, get_track_id
 
 fake = Faker()
 

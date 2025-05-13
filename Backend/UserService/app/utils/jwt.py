@@ -1,5 +1,10 @@
 from datetime import datetime, timedelta
+from uuid import UUID
+
 from jose import JWTError, jwt
+
+from app.database.database import db
+from app.models.user_model import User
 from app.utils.config import get_settings
 
 settings = get_settings()
@@ -20,4 +25,27 @@ def decode_token(token: str) -> dict | None:
     try:
         return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
     except JWTError:
+        return None
+
+
+def get_user_from_token(token: str) -> User | None:
+    """Получение пользователя из JWT токена"""
+    try:
+        # Декодируем токен
+        payload = jwt.decode(
+            token,
+            settings.JWT_SECRET_KEY,
+            algorithms=[settings.JWT_ALGORITHM]
+        )
+
+        # Получаем ID пользователя из токена
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
+
+        # Используем новый стиль SQLAlchemy 2.x для получения пользователя
+        return db.session.get(User, UUID(user_id))
+
+    except (JWTError, ValueError, Exception) as e:
+        # Логирование ошибки может быть добавлено здесь
         return None

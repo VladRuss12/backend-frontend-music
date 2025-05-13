@@ -15,26 +15,32 @@ CORS(
 
 settings = get_settings()
 
+@app.route('/auth/register', methods=['POST'])
+@app.route('/auth/login', methods=['POST'])
+def public_users_proxy():
+    return proxy_request(SERVICE_MAP['/users'])
+
+# Защищённые маршруты — с @jwt_required()
 @app.route('/users', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/users/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@jwt_required
-def users_proxy(path):
+@jwt_required()
+def protected_users_proxy(path=''):
     return proxy_request(SERVICE_MAP['/users'])
 
 @app.route('/music', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/music/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@jwt_required
-def music_proxy(path):
+@jwt_required()
+def music_proxy(path=''):
     return proxy_request(SERVICE_MAP['/music'])
 
 @app.route('/recommendations', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/recommendations/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@jwt_required
-def recommendations_proxy(path):
+@jwt_required()
+def recommendations_proxy(path=''):
     return proxy_request(SERVICE_MAP['/recommendations'])
 
 @app.route('/chat', methods=['POST'])
-@jwt_required
+@jwt_required()
 def chat_proxy():
     return proxy_request(SERVICE_MAP['/chat'])
 

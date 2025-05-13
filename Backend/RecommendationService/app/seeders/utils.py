@@ -5,7 +5,7 @@ from random import choice
 
 def get_user_id():
     try:
-        response = requests.get('http://user_service_url/users')
+        response = requests.get('http://localhost:5001/users')
         if response.status_code == 200:
             return choice(response.json())['id']
     except requests.exceptions.RequestException:
@@ -15,7 +15,7 @@ def get_user_id():
 
 def get_track_id():
     try:
-        response = requests.get('http://music_service_url/tracks')
+        response = requests.get('http://localhost:5002/tracks')
         if response.status_code == 200:
             return choice(response.json())['id']
     except requests.exceptions.RequestException:

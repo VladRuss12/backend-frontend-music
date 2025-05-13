@@ -15,7 +15,6 @@ def create_app():
     app.config.from_object(Config)
 
     init_db(app)
-    migrate.init_app(app, db)
 
     app.register_blueprint(listening_bp)
     app.register_blueprint(recommendation_bp)

@@ -1,7 +1,7 @@
 import requests
 from uuid import UUID
 
-MUSIC_SERVICE_URL = "http://localhost:5003"
+MUSIC_SERVICE_URL = "http://localhost:5002"
 
 def get_track_by_id(track_id: UUID):
     response = requests.get(f"{MUSIC_SERVICE_URL}/tracks/{track_id}")

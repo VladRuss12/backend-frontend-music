@@ -15,7 +15,7 @@ def users_already_seeded():
 
 # Основная функция генерации сидеров пользователей
 def seed_users(session):
-    if users_already_seeded(session):
+    if users_already_seeded():
         print("Пользователи уже существуют. Пропуск сидирования.")
         return
 

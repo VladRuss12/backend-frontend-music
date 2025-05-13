@@ -2,7 +2,7 @@ import bcrypt
 import uuid
 from sqlalchemy.exc import SQLAlchemyError
 from app.utils.jwt import create_access_token, create_refresh_token
-from app.models.user_model import User
+from app.models.user_model import User, UserRole
 from sqlalchemy.orm import Session
 
 
@@ -23,7 +23,7 @@ def register_user(username: str, email: str, password: str, session: Session, ro
             username=username,
             email=email,
             password_hash=hash_password(password),
-            role=role,
+            role=UserRole(role),
             bio="",
             avatar_url="",
             is_active=True
@@ -56,7 +56,7 @@ def authenticate_user(email: str, password: str, session: Session) -> dict | Non
 def create_tokens(user: dict) -> dict:
     user_data = {
         "sub": user["id"],
-        "role": user["role"]
+        "role": user["role"].value
     }
     return {
         "access_token": create_access_token(user_data),

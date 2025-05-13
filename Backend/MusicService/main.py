@@ -19,8 +19,6 @@ def create_app():
 
 
     init_db(app)
-    migrate.init_app(app, db)
-
 
     app.register_blueprint(create_crud_routes(PerformerService, "performers"))
     app.register_blueprint(create_crud_routes(PlaylistService, "playlists"))
