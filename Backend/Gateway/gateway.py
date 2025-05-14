@@ -20,7 +20,7 @@ settings = get_settings()
 def public_users_proxy():
     return proxy_request(SERVICE_MAP['/users'])
 
-# Защищённые маршруты — с @jwt_required()
+
 @app.route('/users', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/users/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @jwt_required()

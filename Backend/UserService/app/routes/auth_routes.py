@@ -9,14 +9,14 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.json
-    session = db.session  # получаем сессию из db
+    session = db.session
 
     try:
         user_id = register_user(
             username=data["username"],
             email=data["email"],
             password=data["password"],
-            session=session  # передаем сессию
+            session=session
         )
         return jsonify({"message": "User registered", "user_id": user_id}), 201
     except ValueError as e:
@@ -29,7 +29,7 @@ def register():
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
-    session = db.session  # получаем сессию из db
+    session = db.session
 
     try:
         user = authenticate_user(data["email"], data["password"], session)  # передаем сессию

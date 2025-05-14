@@ -35,7 +35,8 @@ def get_user_from_token(token: str) -> User | None:
         payload = jwt.decode(
             token,
             settings.JWT_SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM]
+            algorithms=[settings.JWT_ALGORITHM],
+            options = {"verify_exp": False}
         )
 
         # Получаем ID пользователя из токена
@@ -43,7 +44,6 @@ def get_user_from_token(token: str) -> User | None:
         if not user_id:
             return None
 
-        # Используем новый стиль SQLAlchemy 2.x для получения пользователя
         return db.session.get(User, UUID(user_id))
 
     except (JWTError, ValueError, Exception) as e:

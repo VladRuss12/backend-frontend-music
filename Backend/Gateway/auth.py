@@ -1,9 +1,10 @@
-import jwt
+from jose import jwt, JWTError, ExpiredSignatureError
 from functools import wraps
 from flask import request, jsonify
 from config import get_settings
 
 settings = get_settings()
+
 
 def jwt_required(roles=None):
     def decorator(f):
@@ -34,11 +35,13 @@ def jwt_required(roles=None):
                 if roles and user_role not in roles:
                     return jsonify({"error": "Insufficient permissions"}), 403
 
-            except jwt.ExpiredSignatureError:
+            except ExpiredSignatureError:
                 return jsonify({"error": "Token has expired"}), 401
-            except jwt.InvalidTokenError:
+            except JWTError:
                 return jsonify({"error": "Invalid token"}), 401
 
             return f(*args, **kwargs)
+
         return decorated
+
     return decorator
