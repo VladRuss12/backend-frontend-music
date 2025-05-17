@@ -3,22 +3,28 @@ from flask import request, jsonify
 from config import SERVICE_MAP
 
 def proxy_request(service_url):
-    """Проксирование запроса к целевому сервису"""
-    # Определяем целевой путь (удаляем префикс gateway)
     path = request.path
-    for prefix in SERVICE_MAP:
-        if path.startswith(prefix):
-            path = path[len(prefix):]
+    prefix = None
+    for p in SERVICE_MAP:
+        if path.startswith(p):
+            prefix = p
             break
 
     url = f"{service_url}{path}"
 
-    # Подготавливаем заголовки
-    headers = {k: v for k, v in request.headers if k.lower() != 'host'}
+    # Подготовка заголовков
+    headers = {}
+    for k, v in request.headers.items():
+        if k.lower() != 'host':
+            headers[k] = v
+
+    # Явно добавим Authorization обратно
+    if 'Authorization' in request.headers:
+        headers['Authorization'] = request.headers['Authorization']
+
     if hasattr(request, 'current_user'):
         headers['X-User-ID'] = request.current_user
 
-    # Выполняем запрос
     resp = requests.request(
         method=request.method,
         url=url,
@@ -28,8 +34,8 @@ def proxy_request(service_url):
         cookies=request.cookies
     )
 
-    # Формируем ответ
     try:
         return jsonify(resp.json()), resp.status_code
     except:
         return resp.content, resp.status_code
+

@@ -46,7 +46,11 @@ import {
     }, []);
   
     const handleAvatarClick = () => {
-      navigate(isAuthenticated ? "/users/me" : "/auth/login"); 
+      if (isAuthenticated) {
+        navigate("/users/me");
+      } else {
+        navigate("/auth/login");
+      }
     };
   
     const handleSearch = (e) => {

@@ -10,12 +10,19 @@ export const login = async (data) => {
   const res = await axiosInstance.post('/auth/login', data);
   const { access_token, refresh_token, token_type } = res.data;
 
-
   localStorage.setItem('access_token', access_token);
   localStorage.setItem('refresh_token', refresh_token);
   localStorage.setItem('token_type', token_type);
 
-  return res.data;
+  // Получаем данные пользователя
+  const meRes = await axiosInstance.get('/users/me');
+
+  // Возвращаем сразу то, что нужно в setCredentials
+  return {
+    accessToken: access_token,
+    refreshToken: refresh_token,
+    user: meRes.data,
+  };
 };
 
 export const initializeAuth = async (dispatch) => {
@@ -27,7 +34,7 @@ export const initializeAuth = async (dispatch) => {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    dispatch(setCredentials({ token, user: response.data }));
+    dispatch(setCredentials({accessToken: token, user: response.data }));
   } catch (err) {
     console.error("Ошибка при инициализации токена:", err);
     localStorage.removeItem('access_token');

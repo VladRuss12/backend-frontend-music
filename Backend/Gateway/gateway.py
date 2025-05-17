@@ -27,10 +27,15 @@ def public_users_proxy():
 def protected_users_proxy(path=''):
     return proxy_request(SERVICE_MAP['/users'])
 
-@app.route('/music', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
-@app.route('/music/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/music', defaults={'path': ''}, methods=['GET'])
+@app.route('/music/<path:path>', methods=['GET'])
+def public_music_proxy(path=''):
+    return proxy_request(SERVICE_MAP['/music'])
+
+@app.route('/music', defaults={'path': ''}, methods=['POST', 'PUT', 'DELETE'])
+@app.route('/music/<path:path>', methods=['POST', 'PUT', 'DELETE'])
 @jwt_required()
-def music_proxy(path=''):
+def protected_music_proxy(path=''):
     return proxy_request(SERVICE_MAP['/music'])
 
 @app.route('/recommendations', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])

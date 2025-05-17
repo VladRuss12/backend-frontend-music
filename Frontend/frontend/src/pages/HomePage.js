@@ -11,7 +11,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchPopularPlaylists = async () => {
       try {
-        const response = await axiosInstance.get("//playlists/popular");
+        const response = await axiosInstance.get("/recommendations/popular?entity_type=playlist&limit=10");
         setPopularPlaylists(response.data);
       } catch (error) {
         console.error("Ошибка при загрузке популярных плейлистов:", error);
@@ -20,7 +20,7 @@ export default function HomePage() {
 
     const fetchRecommendedTracks = async () => {
       try {
-        const response = await axiosInstance.get("/api/tracks/recommended");
+        const response = await axiosInstance.get("/recommendations/popular?entity_type=track&limit=10");
         setRecommendedTracks(response.data);
       } catch (error) {
         console.error("Ошибка при загрузке рекомендованных треков:", error);

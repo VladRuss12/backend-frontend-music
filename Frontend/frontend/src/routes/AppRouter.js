@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from '../pages/HomePage';       
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import MyProfilePage from '../pages/MyProfilePage';
 import Header from '../components/Header';     
 import Footer from '../components/Footer';      
 
@@ -20,7 +21,7 @@ function AppRouter() {
 
        
         <Route path="/auth/register" element={<RegisterPage />} />
-
+        <Route path="/users/me" element={<MyProfilePage />} />
        
       </Routes>
 
