@@ -16,7 +16,7 @@ def get_liked_entities(db: Session, user_id: UUID, entity_type: str = "track") -
             entity_data = get_track_by_id(like.track_id)
             enriched.append({
                 "track": entity_data,
-                "liked_at": like.timestamp.isoformat()
+                "liked_at": like.timestamp
             })
         return enriched
 
@@ -32,7 +32,7 @@ def get_liked_entities(db: Session, user_id: UUID, entity_type: str = "track") -
             entity_data = get_playlist_by_id(like.playlist_id)
             enriched.append({
                 "playlist": entity_data,
-                "liked_at": like.timestamp.isoformat()
+                "liked_at": like.timestamp
             })
         return enriched
 
@@ -53,7 +53,7 @@ def get_history_by_user(db: Session, user_id: UUID, entity_type: str = "track") 
             entity_data = get_track_by_id(record.track_id)
             enriched.append({
                 "track": entity_data,
-                "timestamp": record.timestamp.isoformat()
+                "timestamp": record.timestamp
             })
         return enriched
 
@@ -69,7 +69,7 @@ def get_history_by_user(db: Session, user_id: UUID, entity_type: str = "track") 
             entity_data = get_playlist_by_id(record.playlist_id)
             enriched.append({
                 "playlist": entity_data,
-                "timestamp": record.timestamp.isoformat()
+                "timestamp": record.timestamp
             })
         return enriched
 

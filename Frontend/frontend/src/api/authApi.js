@@ -14,10 +14,15 @@ export const login = async (data) => {
   localStorage.setItem('refresh_token', refresh_token);
   localStorage.setItem('token_type', token_type);
 
-  // Получаем данные пользователя
   const meRes = await axiosInstance.get('/users/me');
+  if (meRes.data.id) {
+    localStorage.setItem('user_id', meRes.data.id);
+  } else if (meRes.data.user_id) {
+    localStorage.setItem('user_id', meRes.data.user_id);
+  } else {
+    console.error("Не найден id или user_id в данных пользователя:", meRes.data);
+  }
 
-  // Возвращаем сразу то, что нужно в setCredentials
   return {
     accessToken: access_token,
     refreshToken: refresh_token,

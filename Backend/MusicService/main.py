@@ -20,11 +20,11 @@ def create_app():
 
     init_db(app)
 
-    app.register_blueprint(create_crud_routes(PerformerService, "performers"))
-    app.register_blueprint(create_crud_routes(PlaylistService, "playlists"))
-    app.register_blueprint(create_crud_routes(TrackService, "tracks"))
+    app.register_blueprint(create_crud_routes(PerformerService, "/music/performers"))
+    app.register_blueprint(create_crud_routes(PlaylistService, "/music/playlists"))
+    app.register_blueprint(create_crud_routes(TrackService, "/music/tracks"))
     app.register_blueprint(track_upload_bp)
-    app.register_blueprint(search_router, url_prefix='/search')
+    app.register_blueprint(search_router, url_prefix='/music/search')
 
 
     @app.cli.command("seed")

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, Grid, Card, CardMedia, CardContent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from "../api/axiosInstance";
+import { usePlayer } from "../components/Player/PlayerContext";
 
 export default function HomePage() {
   const [popularPlaylists, setPopularPlaylists] = useState([]);
@@ -30,6 +31,36 @@ export default function HomePage() {
     fetchPopularPlaylists();
     fetchRecommendedTracks();
   }, []);
+
+
+  const { playTrack } = usePlayer();
+
+  const handleListen = async (track) => {
+    try {
+     
+      const url = "https://www.samplelib.com/mp3/sample-3s.mp3";
+  
+      playTrack({
+        id: track.id,                 // <-- ОБЯЗАТЕЛЬНО!
+        title: track.name,
+        audioUrl: url,
+        artist: track.artist,
+        albumCover: track.albumCover
+      });
+  
+      // Добавляем в историю (оставляем как было, если надо)
+      const userId = localStorage.getItem("user_id");
+      if (userId) {
+        await axiosInstance.post(
+          "/recommendations/listening/history",
+          { entity_id: track.id, entity_type: "track" },
+          { headers: { "X-User-ID": userId } }
+        );
+      }
+    } catch (error) {
+      console.error("Ошибка при попытке прослушать трек:", error);
+    }
+  };
 
   return (
     <Container>
@@ -85,19 +116,23 @@ export default function HomePage() {
                 image={track.albumCover}
                 alt={track.name}
               />
-              <CardContent>
+               <CardContent>
                 <Typography variant="h6">{track.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   {track.artist}
-                </Typography>
-                <Button size="small" color="primary" onClick={() => navigate(`/track/${track.id}`)}>
-                  Слушать
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+            </Typography>
+            <Button
+              size="small"
+              color="primary"
+              onClick={() => handleListen(track)}
+            >
+              Слушать
+            </Button>
+          </CardContent>
+        </Card>
       </Grid>
+    ))}
+  </Grid>
     </Container>
   );
 }

@@ -7,21 +7,35 @@ from app.database.database import get_session
 from app.schemas.like_schema import LikeSchema
 from app.schemas.history_schema import HistorySchema
 
-listening_bp = Blueprint('listening', __name__, url_prefix="/listening")
+listening_bp = Blueprint("listening", __name__, url_prefix="/recommendations/listening")
 
 history_schema = HistorySchema()
 like_schema = LikeSchema()
 history_list_schema = HistorySchema(many=True)
 like_list_schema = LikeSchema(many=True)
 
+
+def get_user_id_from_header() -> UUID:
+    user_id = request.headers.get("X-User-ID")
+    if not user_id:
+        return jsonify({"message": "Missing X-User-ID header"}), 401
+    try:
+        return UUID(user_id)
+    except ValueError:
+        return jsonify({"message": "Invalid UUID in X-User-ID header"}), 400
+
+
 @listening_bp.post("/history")
 def add_history():
-    data = request.get_json()
-    user_id = UUID(data["user_id"])
-    entity_id = UUID(data["entity_id"])  # track_id или playlist_id
-    entity_type = data.get("entity_type", "track")  # По умолчанию "track"
+    user_id = get_user_id_from_header()
+    if isinstance(user_id, tuple):  # Ошибка
+        return user_id
 
-    service = ListeningService(get_session())
+    data = request.get_json()
+    entity_id = UUID(data["entity_id"])
+    entity_type = data.get("entity_type", "track")
+
+    service = ListeningService(get_session(), entity_type)
     if entity_type == "track":
         history = service.add_history(user_id, entity_id)
     elif entity_type == "playlist":
@@ -29,67 +43,79 @@ def add_history():
     else:
         return jsonify({"message": "Unsupported entity_type"}), 400
 
-    return history_schema.jsonify(history)
+    return jsonify(history_schema.dump(history))
+
 
 @listening_bp.post("/like")
 def like_entity():
+    user_id = get_user_id_from_header()
+    if isinstance(user_id, tuple):
+        return user_id
+
     data = request.get_json()
-    user_id = UUID(data["user_id"])
     entity_id = UUID(data["entity_id"])
     entity_type = data.get("entity_type", "track")
 
-    service = ListeningService(get_session())
-    if entity_type == "track":
-        like = service.like_track(user_id, entity_id)
-    elif entity_type == "playlist":
-        like = service.like_playlist(user_id, entity_id)
+    service = ListeningService(get_session(), entity_type)
+    if entity_type in ("track", "playlist"):
+        like = service.like_media(user_id, entity_id)
     else:
         return jsonify({"message": "Unsupported entity_type"}), 400
 
-    return like_schema.jsonify(like)
+    return jsonify(like_schema.dump(like))
+
 
 @listening_bp.post("/unlike")
 def unlike_entity():
+    user_id = get_user_id_from_header()
+    if isinstance(user_id, tuple):
+        return user_id
+
     data = request.get_json()
-    user_id = UUID(data["user_id"])
     entity_id = UUID(data["entity_id"])
     entity_type = data.get("entity_type", "track")
 
-    service = ListeningService(get_session())
-    if entity_type == "track":
-        like = service.unlike_track(user_id, entity_id)
-    elif entity_type == "playlist":
-        like = service.unlike_playlist(user_id, entity_id)
+    service = ListeningService(get_session(), entity_type)
+    if entity_type in ("track", "playlist"):
+        like = service.unlike_media(user_id, entity_id)
     else:
         return jsonify({"message": "Unsupported entity_type"}), 400
 
     if like:
-        return like_schema.jsonify(like)
+        return jsonify(like_schema.dump(like))
     else:
         return jsonify({"message": "Like not found"}), 404
 
+
 @listening_bp.get("/history")
 def get_history():
-    user_id = UUID(request.args.get("user_id"))
-    entity_type = request.args.get("entity_type", "track")
+    user_id = get_user_id_from_header()
+    if isinstance(user_id, tuple):
+        return user_id
 
+    entity_type = request.args.get("entity_type", "track")
     session = get_session()
     history = get_history_by_user(session, user_id, entity_type)
 
+    # Гарантируем, что всегда возвращаем массив
     if not history:
-        return jsonify({"message": "History not found"}), 404
+        return jsonify([]), 200
 
-    return jsonify(history)
+    # many=True — сериализация списка!
+    return jsonify(history_list_schema.dump(history))
+
 
 @listening_bp.get("/liked")
 def get_liked_entities_route():
-    user_id = UUID(request.args.get("user_id"))
-    entity_type = request.args.get("entity_type", "track")
+    user_id = get_user_id_from_header()
+    if isinstance(user_id, tuple):
+        return user_id
 
+    entity_type = request.args.get("entity_type", "track")
     session = get_session()
     liked = get_liked_entities(session, user_id, entity_type)
 
     if not liked:
-        return jsonify({"message": f"No liked {entity_type}s found"}), 404
+        return jsonify([]), 200
 
-    return jsonify(liked)
+    return jsonify(like_list_schema.dump(liked))

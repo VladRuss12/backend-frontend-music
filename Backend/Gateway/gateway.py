@@ -23,7 +23,7 @@ def public_users_proxy():
 
 @app.route('/users', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/users/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@jwt_required()
+@jwt_required(inject_user_id=False)
 def protected_users_proxy(path=''):
     return proxy_request(SERVICE_MAP['/users'])
 
@@ -34,7 +34,7 @@ def public_music_proxy(path=''):
 
 @app.route('/music', defaults={'path': ''}, methods=['POST', 'PUT', 'DELETE'])
 @app.route('/music/<path:path>', methods=['POST', 'PUT', 'DELETE'])
-@jwt_required()
+@jwt_required(inject_user_id=False)
 def protected_music_proxy(path=''):
     return proxy_request(SERVICE_MAP['/music'])
 
@@ -45,7 +45,7 @@ def recommendations_proxy(path=''):
     return proxy_request(SERVICE_MAP['/recommendations'])
 
 @app.route('/chat', methods=['POST'])
-@jwt_required()
+@jwt_required(inject_user_id=False)
 def chat_proxy():
     return proxy_request(SERVICE_MAP['/chat'])
 

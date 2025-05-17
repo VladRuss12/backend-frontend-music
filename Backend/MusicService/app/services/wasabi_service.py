@@ -1,3 +1,4 @@
+import os
 import boto3
 import uuid
 import tempfile
@@ -6,8 +7,13 @@ import importlib.util
 from werkzeug.datastructures import FileStorage
 
 
-def load_wasabi_config(path: str = "config/wasabi_config.py"):
-    spec = importlib.util.spec_from_file_location("wasabi_config", path)
+def load_wasabi_config(path: str = "app/utils/wasabi_config.py"):
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.abspath(os.path.join(base_dir, "..", "utils", "wasabi_config.py"))
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Wasabi config not found at {config_path}")
+
+    spec = importlib.util.spec_from_file_location("wasabi_config", config_path)
     wasabi_config = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(wasabi_config)
     return wasabi_config

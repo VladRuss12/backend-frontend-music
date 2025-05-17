@@ -6,7 +6,7 @@ from io import BytesIO
 from app.services.track_service import TrackService
 from app.services.wasabi_service import upload_track_to_wasabi, get_track_duration
 
-track_upload_bp = Blueprint('track_upload', __name__, url_prefix='/tracks')
+track_upload_bp = Blueprint('track_upload', __name__, url_prefix='/music/tracks')
 
 
 @track_upload_bp.post('/upload')
