@@ -1,17 +1,18 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import { useThemeMode } from './themes';    
+import { useThemeMode } from './themes';
 import AppRouter from './routes/AppRouter';
-import { initializeAuth } from './api/authApi';
+import { initializeAuth } from './features/auth/authService';
+import { setCredentials } from './features/auth/authSlice'; 
 import { PlayerProvider } from './components/Player/PlayerContext';
 
 export default function App() {
   const dispatch = useDispatch();
-  const { theme } = useThemeMode();         
+  const { theme } = useThemeMode();
 
   useEffect(() => {
-    initializeAuth(dispatch);
+    initializeAuth(dispatch, setCredentials); 
   }, [dispatch]);
 
   return (

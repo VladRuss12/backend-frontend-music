@@ -14,16 +14,12 @@ const authSlice = createSlice({
       const { user, accessToken, refreshToken } = action.payload;
       state.user = user;
       state.accessToken = accessToken;
-      state.refreshToken = refreshToken; 
-      localStorage.setItem('access_token', accessToken);
-      localStorage.setItem('refresh_token', refreshToken); 
+      state.refreshToken = refreshToken;
     },
     logout: (state) => {
       state.user = null;
-      state.token = null;
-      state.refreshToken = null; 
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
+      state.accessToken = null;
+      state.refreshToken = null;
     },
   },
 });
