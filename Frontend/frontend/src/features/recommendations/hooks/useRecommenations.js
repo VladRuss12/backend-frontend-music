@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback } from 'react';
-import { setRecommendations, setLoading, setError } from '../recommendationsSlice';
+import { setRecommendations, setLoading,setLoaded, setError } from '../recommendationsSlice';
 import { fetchRecommendations } from '../recommendationsService';
 
 // Для персональных рекомендаций

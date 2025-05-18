@@ -1,26 +1,33 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  items: [],       
-  popular: [],     
-  history: [],
-  liked: [],
-  loading: false,
-  error: null,
+  popular: {},
+  loading: {},
+  error: {},
 };
 
 const recommendationsSlice = createSlice({
   name: 'recommendations',
   initialState,
   reducers: {
-    setRecommendations: (state, action) => { state.items = action.payload; },
-    setPopular: (state, action) => { state.popular = action.payload; },
-    setHistory: (state, action) => { state.history = action.payload; },
-    setLiked: (state, action) => { state.liked = action.payload; },
-    setLoading: (state, action) => { state.loading = action.payload; },
-    setError: (state, action) => { state.error = action.payload; },
-  },
+    setPopular: (state, action) => {
+      const { entityType, ids } = action.payload;
+      state.popular[entityType] = ids;
+    },
+    setLoading: (state, action) => {
+      const entityType = action.payload;
+      state.loading[entityType] = true;
+    },
+    setLoaded: (state, action) => {
+      const entityType = action.payload;
+      state.loading[entityType] = false;
+    },
+    setError: (state, action) => {
+      const { entityType, error } = action.payload;
+      state.error[entityType] = error;
+    },
+  }
 });
 
-export const { setRecommendations, setPopular, setHistory, setLiked, setLoading, setError } = recommendationsSlice.actions;
+export const { setPopular, setLoading, setLoaded, setError } = recommendationsSlice.actions;
 export default recommendationsSlice.reducer;

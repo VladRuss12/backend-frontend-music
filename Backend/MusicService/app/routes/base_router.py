@@ -10,7 +10,7 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
     def get_all():
         try:
             items = service.get_all()
-            return jsonify(items)  # <-- Убираем [item.dict() for item in items]
+            return jsonify(items)
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
@@ -20,7 +20,7 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
             item = service.get_by_id(item_id)
             if not item:
                 raise NotFound(f"{service.model.__name__} with ID {item_id} not found.")
-            return jsonify(item)  # <-- Убираем item.dict()
+            return jsonify(item)
         except NotFound as e:
             return jsonify({"error": str(e)}), 404
         except Exception as e:

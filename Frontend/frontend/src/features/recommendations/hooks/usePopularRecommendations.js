@@ -1,25 +1,26 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback } from 'react';
-import { setPopular, setLoading, setError } from '../recommendationsSlice';
+import { setPopular, setLoading,setLoaded, setError } from '../recommendationsSlice';
 import { fetchPopularRecommendations } from '../recommendationsService';
 
 export function usePopularRecommendations(entityType = 'track', limit = 10) {
   const dispatch = useDispatch();
-  const ids = useSelector(state => state.recommendations.popular);
-  const loading = useSelector(state => state.recommendations.loading);
-  const error = useSelector(state => state.recommendations.error);
+  // теперь ids и loading берём по типу!
+  const ids = useSelector(state => state.recommendations.popular[entityType] || []);
+  const loading = useSelector(state => state.recommendations.loading[entityType]);
+  const error = useSelector(state => state.recommendations.error[entityType]);
 
   const loadPopular = useCallback(async () => {
-    dispatch(setLoading(true));
+    dispatch(setLoading(entityType));
     try {
       const data = await fetchPopularRecommendations(entityType, limit);
       const onlyIds = data.map(item => item.id);
-      dispatch(setPopular(onlyIds));
-      dispatch(setError(null));
+      dispatch(setPopular({ entityType, ids: onlyIds }));
+      dispatch(setError({ entityType, error: null }));
     } catch (e) {
-      dispatch(setError('Ошибка загрузки популярных'));
+      dispatch(setError({ entityType, error: 'Ошибка загрузки популярных' }));
     } finally {
-      dispatch(setLoading(false));
+      dispatch(setLoaded(entityType));
     }
   }, [dispatch, entityType, limit]);
 
