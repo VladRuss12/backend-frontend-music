@@ -41,6 +41,7 @@
 # dotenv & configs
 **/app/database/config.py
 /Backend/MusicService/.env
+/Backend/AiService/ai.env
 
 # Alembic & тестовые кэши
 **/migrations/.mypy_cache/

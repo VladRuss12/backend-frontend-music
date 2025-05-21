@@ -22,7 +22,7 @@ SERVICE_MAP = {
     '/users': 'http://user-service:5001',
     '/music': 'http://music-service:5002',
     '/recommendations': 'http://recommendation-service:5003',
-    '/chat': 'http://chat-service:5004'
+    '/chat': 'http://ai-service:5004'
 }
 
 @lru_cache()

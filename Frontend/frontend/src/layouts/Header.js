@@ -5,15 +5,17 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useUser } from '../features/user/hooks/useUser';
 import { useNavigate } from 'react-router-dom';
+import ChatWindow from '../features/aiChat/components/ChatWindow';
+import ChatIcon from "@mui/icons-material/Chat";
 
 const menuItems = [
   { text: 'Главная', path: '/' },
   { text: 'Плейлисты', path: '/playlists' },
-  // Можно добавить другие пункты меню
 ];
 
 export default function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const user = useUser();
   const navigate = useNavigate();
 
@@ -33,23 +35,22 @@ export default function Header() {
     <>
       <AppBar position="static">
         <Toolbar>
-          {/* Кнопка гамбургера для меню */}
           <IconButton edge="start" color="inherit" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
-
-          {/* Название сервиса */}
           <Typography variant="h6" sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
             MyMusicService
           </Typography>
-
-          {/* Иконка настроек */}
+          <Tooltip title="Чат с AI">
+            <IconButton color="inherit" onClick={() => setChatOpen(o => !o)}>
+              <ChatIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Настройки">
             <IconButton color="inherit" onClick={handleSettingsClick}>
               <SettingsIcon />
             </IconButton>
           </Tooltip>
-
           <Tooltip title="Профиль">
             <IconButton color="inherit" onClick = {handleAvatarClick} sx={{ p: 0 }}>
               <UserAvatar user={user} size={40} />
@@ -57,8 +58,7 @@ export default function Header() {
           </Tooltip>
         </Toolbar>
       </AppBar>
-
-      {/* Левое выезжающее меню */}
+      {chatOpen && <ChatWindow onClose={() => setChatOpen(false)} />}
       <Drawer anchor="left" open={drawerOpen} onClose={handleDrawerToggle}>
         <Box sx={{ width: 250 }} role="presentation" onClick={handleDrawerToggle} onKeyDown={handleDrawerToggle}>
           <List>

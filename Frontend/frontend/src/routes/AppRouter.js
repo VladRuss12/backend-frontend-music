@@ -6,7 +6,7 @@ import UserPage from '../features/user/pages/UserPage';
 import Header from '../layouts/Header';
 import Footer from '../layouts/Footer';
 import PlayerBar from '../components/Player/PlayerBar';
-import ChatWindow from '../features/aiChat/components/chatWindow';
+import ChatWindow from '../features/aiChat/components/ChatWindow';
 
 function AppRouter() {
   return (
