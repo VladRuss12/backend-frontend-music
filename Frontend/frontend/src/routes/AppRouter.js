@@ -5,7 +5,6 @@ import RegisterPage from '../features/auth/pages/RegisterPage';
 import UserPage from '../features/user/pages/UserPage';
 import Header from '../layouts/Header';
 import Footer from '../layouts/Footer';
-import PlayerBar from '../components/Player/PlayerBar';
 import ChatWindow from '../features/aiChat/components/ChatWindow';
 
 function AppRouter() {
@@ -20,8 +19,6 @@ function AppRouter() {
         <Route path="/users/me" element={<UserPage />} />
         <Route path="/ai-chat" element={<ChatWindow />} />
       </Routes>
-
-      <PlayerBar />
       <Footer />
     </>
   );

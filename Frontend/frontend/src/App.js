@@ -5,7 +5,8 @@ import { useThemeMode } from './themes';
 import AppRouter from './routes/AppRouter';
 import { initializeAuth } from './features/auth/authService';
 import { setCredentials } from './features/auth/authSlice'; 
-import { PlayerProvider } from './components/Player/PlayerContext';
+import { PlayerProvider } from './features/music/context/PlayerContext';
+import PlayerBar from './features/music/components/PlayerBar';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ export default function App() {
       <CssBaseline />
       <PlayerProvider>
         <AppRouter />
+        <PlayerBar />
       </PlayerProvider>
     </ThemeProvider>
   );

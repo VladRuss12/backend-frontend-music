@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
+import { Card, CardMedia, CardContent, Typography } from "@mui/material";
 import axiosInstance from "../../../api/axiosInstance";
 import placeholder from './placeholder.svg';
+import { usePlayer } from "../context/PlayerContext";
 
 export default function TrackCard({ track }) {
   const [performer, setPerformer] = useState(null);
+  const { playTrack, currentTrack, isPlaying, pause, resume } = usePlayer();
 
   useEffect(() => {
     async function fetchPerformer() {
@@ -19,8 +21,29 @@ export default function TrackCard({ track }) {
     fetchPerformer();
   }, [track.performer_id]);
 
+  const isCurrent = currentTrack?.id === track.id;
+
+  const handleClick = () => {
+    if (isCurrent) {
+      if (isPlaying) pause();
+      else resume();
+    } else {
+      playTrack(track);
+    }
+  };
+
   return (
-    <Card sx={{ width: 200, mx: 1, flex: "0 0 auto" }}>
+    <Card
+      sx={{
+        width: 200,
+        mx: 1,
+        flex: "0 0 auto",
+        cursor: 'pointer',
+        outline: isCurrent ? '2px solid #1db954' : undefined,
+        boxShadow: isCurrent ? 6 : 1,
+      }}
+      onClick={handleClick}
+    >
       <CardMedia
         component="img"
         height="140"
