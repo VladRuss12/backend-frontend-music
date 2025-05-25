@@ -11,15 +11,16 @@ def get_liked_entities(db: Session, user_id: UUID, entity_type: str = "track") -
             .order_by(Like.timestamp.desc())
             .all()
         )
-        enriched = []
-        for like in likes:
-            entity_data = get_track_by_id(like.track_id)
-            enriched.append({
-                "track": entity_data,
+        return [
+            {
+                "id": str(like.id),  # id лайка
+                "entity_id": str(like.track_id),  # id трека
+                "entity_type": "track",
+                "track": get_track_by_id(like.track_id),
                 "liked_at": like.timestamp
-            })
-        return enriched
-
+            }
+            for like in likes
+        ]
     elif entity_type == "playlist":
         likes = (
             db.query(Like)
@@ -27,15 +28,16 @@ def get_liked_entities(db: Session, user_id: UUID, entity_type: str = "track") -
             .order_by(Like.timestamp.desc())
             .all()
         )
-        enriched = []
-        for like in likes:
-            entity_data = get_playlist_by_id(like.playlist_id)
-            enriched.append({
-                "playlist": entity_data,
+        return [
+            {
+                "id": str(like.id),
+                "entity_id": str(like.playlist_id),
+                "entity_type": "playlist",
+                "playlist": get_playlist_by_id(like.playlist_id),
                 "liked_at": like.timestamp
-            })
-        return enriched
-
+            }
+            for like in likes
+        ]
     else:
         raise ValueError("Unsupported entity_type")
 
@@ -48,15 +50,15 @@ def get_history_by_user(db: Session, user_id: UUID, entity_type: str = "track") 
             .order_by(ListeningHistory.timestamp.desc())
             .all()
         )
-        enriched = []
-        for record in history:
-            entity_data = get_track_by_id(record.track_id)
-            enriched.append({
-                "track": entity_data,
-                "timestamp": record.timestamp
-            })
-        return enriched
-
+        return [
+            {
+                "id": record.id,
+                "track_id": record.track_id,
+                "timestamp": record.timestamp,
+                "track": get_track_by_id(record.track_id)
+            }
+            for record in history
+        ]
     elif entity_type == "playlist":
         history = (
             db.query(ListeningHistory)
@@ -64,14 +66,14 @@ def get_history_by_user(db: Session, user_id: UUID, entity_type: str = "track") 
             .order_by(ListeningHistory.timestamp.desc())
             .all()
         )
-        enriched = []
-        for record in history:
-            entity_data = get_playlist_by_id(record.playlist_id)
-            enriched.append({
-                "playlist": entity_data,
-                "timestamp": record.timestamp
-            })
-        return enriched
-
+        return [
+            {
+                "id": record.id,
+                "playlist_id": record.playlist_id,
+                "timestamp": record.timestamp,
+                "playlist": get_playlist_by_id(record.playlist_id)
+            }
+            for record in history
+        ]
     else:
         raise ValueError("Unsupported entity_type")

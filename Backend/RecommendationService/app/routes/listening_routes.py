@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify
 from uuid import UUID
 
+from app.models.history_model import ListeningHistory
+from app.schemas.history_enriched_schema import HistoryEnrichedSchema
 from app.services.common_user_data import get_liked_entities, get_history_by_user
 from app.services.listening_service import ListeningService
-from app.database.database import get_session
+from app.database.database import get_session, db
 from app.schemas.like_schema import LikeSchema
 from app.schemas.history_schema import HistorySchema
 
@@ -96,13 +98,7 @@ def get_history():
     entity_type = request.args.get("entity_type", "track")
     session = get_session()
     history = get_history_by_user(session, user_id, entity_type)
-
-    # Гарантируем, что всегда возвращаем массив
-    if not history:
-        return jsonify([]), 200
-
-    # many=True — сериализация списка!
-    return jsonify(history_list_schema.dump(history))
+    return jsonify(history)
 
 
 @listening_bp.get("/liked")
@@ -114,8 +110,4 @@ def get_liked_entities_route():
     entity_type = request.args.get("entity_type", "track")
     session = get_session()
     liked = get_liked_entities(session, user_id, entity_type)
-
-    if not liked:
-        return jsonify([]), 200
-
-    return jsonify(like_list_schema.dump(liked))
+    return jsonify(liked)

@@ -6,9 +6,9 @@ import { useIsAuthenticated } from '../../auth/hooks/useIsAuthenticated';
 
 export function useLikes(entityType = 'track') {
   const dispatch = useDispatch();
+  const loading = useSelector(state => state.recommendations.loading['liked']);
+  const error = useSelector(state => state.recommendations.error['liked']);
   const liked = useSelector(state => state.recommendations.liked);
-  const loading = useSelector(state => state.recommendations.loading);
-  const error = useSelector(state => state.recommendations.error);
   const isAuthenticated = useIsAuthenticated();
 
   // Загрузка лайков

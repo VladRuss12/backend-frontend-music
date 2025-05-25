@@ -6,7 +6,8 @@ const initialState = {
   loaded: {},    
   error: {},
   liked: [],
-  history: []
+  history: [],
+  items: [] // <----- добавьте, если его ещё нет
 };
 
 const recommendationsSlice = createSlice({
@@ -42,8 +43,12 @@ const recommendationsSlice = createSlice({
     setHistory: (state, action) => {   
       state.history = action.payload || [];
     },
+    // --- добавьте этот редьюсер ---
+    setRecommendations: (state, action) => {
+      state.items = action.payload || [];
+    }
   }
 });
 
-export const { setPopular, setLoading, setLoaded, setError, setLiked, setHistory } = recommendationsSlice.actions;
+export const { setPopular, setLoading, setLoaded, setError, setLiked, setHistory, setRecommendations } = recommendationsSlice.actions;
 export default recommendationsSlice.reducer;
