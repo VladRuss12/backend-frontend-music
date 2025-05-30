@@ -7,6 +7,7 @@ import Header from '../layouts/Header';
 import Footer from '../layouts/Footer';
 import ChatWindow from '../features/aiChat/components/ChatWindow';
 import PlaylistPage from '../pages/PlaylistPage';
+import SearchResultsPage from '../features/search/components/SearchResultsPage';
 
 function AppRouter() {
   return (
@@ -20,6 +21,7 @@ function AppRouter() {
         <Route path="/users/me" element={<UserPage />} />
         <Route path="/ai-chat" element={<ChatWindow />} />
         <Route path="/playlist/:playlistId" element={<PlaylistPage />} />
+        <Route path="/music/search" element={<SearchResultsPage />} />
       </Routes>
       <Footer />
     </>

@@ -1,65 +1,40 @@
+import React, { useState } from "react";
+import { Typography, Box, Button } from "@mui/material";
 import { useEntities } from "../../music/hooks/useEntities";
-import { useEntity } from "../../music/hooks/useEntity";
-import React from "react";
-import { List, ListItem, ListItemText, Typography } from "@mui/material";
-import { usePlayer } from "../../music/context/PlayerContext";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import MusicTable from "../../music/components/MusicTable";
 
-export default function HistoryList({ history, type }) {
+export default function HistoryList({ history, maxVisible = 5 }) {
   const { items: tracks } = useEntities("tracks");
-  const { playTrack, currentTrack, isPlaying, pause, resume } = usePlayer();
+  const [expanded, setExpanded] = useState(false);
 
   if (!history?.length) {
     return <Typography color="textSecondary">Нет данных</Typography>;
   }
 
+  const historyTracks = history
+    .map(item => tracks.find(t => t.id === item.track_id || t.id === item.id) || item.track)
+    .filter(Boolean);
+
+  const visibleTracks = expanded ? historyTracks : historyTracks.slice(0, maxVisible);
+  const hasMore = historyTracks.length > maxVisible;
+
   return (
-    <List>
-      {history.map((item, idx) => {
-        const track = tracks.find(t => t.id === item.track_id || t.id === item.id) || item.track;
-        const key = `${item.id}_${item.timestamp}`;
-        const performerId = track?.performer_id;
-        const isCurrent = currentTrack?.id === track?.id;
-
-        // Отдельный компонент для загрузки исполнителя
-        const Performer = () => {
-          const { entity: performer, loading } = useEntity("performers", performerId);
-          if (!performerId) return <>Неизвестно</>;
-          if (loading) return <>Загрузка...</>;
-          return <>{performer?.name || performerId || "Неизвестно"}</>;
-        };
-
-        const handleClick = () => {
-          if (!track) return;
-          if (isCurrent) {
-            if (isPlaying) pause();
-            else resume();
-          } else {
-            playTrack(track);
-          }
-        };
-
-        return (
-          <ListItem
-            key={key}
-            button
-            onClick={handleClick}
-            selected={isCurrent}
-            sx={{
-              cursor: 'pointer',
-              bgcolor: isCurrent ? '#f0fff0' : undefined
-            }}
+    <>
+      <MusicTable items={visibleTracks} type="track" showIndex={true} />
+      {hasMore && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
+          <Button
+            variant="text"
+            color="primary"
+            onClick={() => setExpanded(e => !e)}
+            endIcon={expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           >
-            <ListItemText
-              primary={track ? track.title : `[id: ${item.track_id || item.id}]`}
-              secondary={
-                track
-                  ? <>Исполнитель: <Performer /></>
-                  : `Время: ${item.timestamp}`
-              }
-            />
-          </ListItem>
-        );
-      })}
-    </List>
+            {expanded ? "Скрыть" : `Показать ещё (${historyTracks.length - maxVisible})`}
+          </Button>
+        </Box>
+      )}
+    </>
   );
 }

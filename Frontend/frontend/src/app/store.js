@@ -4,6 +4,7 @@ import authReducer from '../features/auth/authSlice';
 import chatReducer from '../features/aiChat';
 import recommendationsReducer from '../features/recommendations/recommendationsSlice';
 import entitiesReducer from '../features/music/entitiesSlice';
+import searchReducer from '../features/search/searchSlice';
 import { authMiddleware } from '../features/auth/authMiddleware';
 
 export const store = configureStore({
@@ -12,6 +13,7 @@ export const store = configureStore({
     user: userReducer,           
     chat: chatReducer,
     entities: entitiesReducer,
+    search: searchReducer,
     recommendations: recommendationsReducer,
   },
   middleware: (getDefaultMiddleware) =>

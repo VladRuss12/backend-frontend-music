@@ -6,6 +6,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useUser } from '../features/user/hooks/useUser';
 import { useNavigate } from 'react-router-dom';
 import ChatWindow from '../features/aiChat/components/ChatWindow';
+import SearchDropdown from '../features/search/components/SearchDropdown';
 import ChatIcon from "@mui/icons-material/Chat";
 
 const menuItems = [
@@ -38,9 +39,12 @@ export default function Header() {
           <IconButton edge="start" color="inherit" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <Typography variant="h6" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
             MyMusicService
           </Typography>
+          <Box sx={{ flexGrow: 1, mx: 3, display: { xs: 'none', sm: 'block' } }}>
+            <SearchDropdown />
+          </Box>
           <Tooltip title="Чат с AI">
             <IconButton color="inherit" onClick={() => setChatOpen(o => !o)}>
               <ChatIcon />
@@ -52,7 +56,7 @@ export default function Header() {
             </IconButton>
           </Tooltip>
           <Tooltip title="Профиль">
-            <IconButton color="inherit" onClick = {handleAvatarClick} sx={{ p: 0 }}>
+            <IconButton color="inherit" onClick={handleAvatarClick} sx={{ p: 0 }}>
               <UserAvatar user={user} size={40} />
             </IconButton>
           </Tooltip>

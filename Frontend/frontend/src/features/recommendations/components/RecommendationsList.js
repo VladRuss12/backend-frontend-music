@@ -1,67 +1,40 @@
+import React, { useState } from "react";
+import { Typography, Box, Button } from "@mui/material";
 import { useEntities } from "../../music/hooks/useEntities";
-import React from "react";
-import { List, ListItem, ListItemText, Typography } from "@mui/material";
-import { usePlayer } from "../../music/context/PlayerContext";
-import { useEntity } from "../../music/hooks/useEntity";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import MusicTable from "../../music/components/MusicTable";
 
-// Компонент для отображения имени исполнителя с загрузкой по performer_id
-function PerformerName({ performerId }) {
-  const { entity: performer, loading } = useEntity("performers", performerId);
-  if (!performerId) return <>Неизвестно</>;
-  if (loading) return <>Загрузка исполнителя...</>;
-  return <>{performer?.name || performerId}</>;
-}
-
-export default function RecommendationsList({ recommendations }) {
+export default function RecommendationsList({ recommendations, maxVisible = 5 }) {
   const { items: tracks } = useEntities("tracks");
-  const { playTrack, currentTrack, isPlaying, pause, resume } = usePlayer();
+  const [expanded, setExpanded] = useState(false);
 
   if (!recommendations?.length) {
     return <Typography color="textSecondary">Нет рекомендаций</Typography>;
   }
-  
-console.log('recommendations', recommendations);
+
+  const recommendationTracks = recommendations
+    .map(item => tracks.find(t => t.id === item.id) || item.track)
+    .filter(Boolean);
+
+  const visibleTracks = expanded ? recommendationTracks : recommendationTracks.slice(0, maxVisible);
+  const hasMore = recommendationTracks.length > maxVisible;
+
   return (
-    <List>
-      {recommendations.map((item, idx) => {
-        // item.track возможен если приходит enrichment
-        const track = tracks.find(t => t.id === item.id) || item.track;
-        const key = `${item.id || idx}`;
-        const isCurrent = currentTrack?.id === track?.id;
-        const performerId = track?.performer_id;
-
-        const handleClick = () => {
-          if (!track) return;
-          if (isCurrent) {
-            if (isPlaying) pause();
-            else resume();
-          } else {
-            playTrack(track);
-          }
-        };
-
-        return (
-          <ListItem
-            key={key}
-            button
-            onClick={handleClick}
-            selected={isCurrent}
-            sx={{
-              cursor: 'pointer',
-              bgcolor: isCurrent ? '#f0fff0' : undefined,
-            }}
+    <>
+      <MusicTable items={visibleTracks} type="track" showIndex={true} />
+      {hasMore && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 1 }}>
+          <Button
+            variant="text"
+            color="primary"
+            onClick={() => setExpanded(e => !e)}
+            endIcon={expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           >
-            <ListItemText
-              primary={track ? track.title : `[id: ${item.id}]`}
-              secondary={
-                track
-                  ? <>Исполнитель: <PerformerName performerId={performerId} /></>
-                  : ""
-              }
-            />
-          </ListItem>
-        );
-      })}
-    </List>
+            {expanded ? "Скрыть" : `Показать ещё (${recommendationTracks.length - maxVisible})`}
+          </Button>
+        </Box>
+      )}
+    </>
   );
 }

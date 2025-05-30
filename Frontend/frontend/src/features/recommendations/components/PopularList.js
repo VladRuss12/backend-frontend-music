@@ -4,6 +4,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { usePopularRecommendations } from "../hooks/usePopularRecommendations";
 import { useEntities } from "../../music/hooks/useEntities";
+import MusicCard from "../../music/components/MusicCard"; 
 
 const CARD_WIDTH = 200;
 const CARD_MARGIN = 16;
@@ -12,7 +13,6 @@ const STEP = CARD_WIDTH + CARD_MARGIN * 2;
 export default function PopularList({
   entityType,           // "tracks" | "playlists"
   recommendationType,   // "track" | "playlist"
-  CardComponent,        // компонент для отображения карточки (TrackCard, PlaylistCard)
   title,
   emptyText = "Нет данных"
 }) {
@@ -60,10 +60,9 @@ export default function PopularList({
           }}
         >
           {popularEntities.map((entity) => (
-            
             <Box key={entity.id} sx={{ mx: 2, minWidth: CARD_WIDTH, maxWidth: CARD_WIDTH }}>
-              <CardComponent {...{ [entityType.slice(0, -1)]: entity }} />
-              {/* entityType: "tracks" => prop: track, "playlists" => prop: playlist */}
+              {/* Универсальный способ */}
+              <MusicCard item={entity} type={recommendationType} />
             </Box>
           ))}
         </Box>

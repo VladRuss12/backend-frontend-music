@@ -2,8 +2,7 @@ import React from 'react';
 import { Box, Typography, Container, Divider } from '@mui/material';
 import PopularList from '../features/recommendations/components/PopularList';
 import { useUser } from '../features/user/hooks/useUser';
-import TrackCard from "../features/music/components/TrackCard";
-import PlaylistCard from "../features/music/components/PlaylistCard";
+import MusicCard from "../features/music/components/MusicCard"; 
 
 export default function HomePage() {
   const user = useUser();
@@ -15,11 +14,10 @@ export default function HomePage() {
       </Typography>
       <Divider sx={{ my: 4 }} />
 
-      
       <PopularList
         entityType="tracks"
         recommendationType="track"
-        CardComponent={TrackCard}
+        CardComponent={({ item }) => <MusicCard item={item} type="track" />}
         title="Популярные треки"
         emptyText="Нет популярных треков"
       />
@@ -27,12 +25,10 @@ export default function HomePage() {
       <PopularList
         entityType="playlists"
         recommendationType="playlist"
-        CardComponent={PlaylistCard}
+        CardComponent={({ item }) => <MusicCard item={item} type="playlist" />}
         title="Популярные плейлисты"
         emptyText="Нет популярных плейлистов"
       />
-
-      
     </Container>
   );
 }
