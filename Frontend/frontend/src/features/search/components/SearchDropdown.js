@@ -42,9 +42,14 @@ export default function SearchDropdown() {
     setOpen(false);
     setInput("");
     clear();
-    navigate(`/music/${entityType}/${id}`);
+    // Список сущностей, которые должны вести на общий поиск по типу
+    const searchTypes = ["tracks", "playlists", "performers"];
+    if (searchTypes.includes(entityType)) {
+      navigate(`/music/search?query=${encodeURIComponent(input.trim())}&type=${entityType}`);
+    } else {
+      navigate(`/music/${entityType}/${id}`);
+    }
   };
-
   // Навигация на общий поиск по Enter или по кнопке
   const handleSearchSubmit = (e) => {
     e.preventDefault();
