@@ -11,13 +11,10 @@ from app.seeders.seed import seed_all
 from app.services.track_service import TrackService
 from app.routes.search_router import search_router
 
-migrate = Migrate()
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-
-
+    Migrate(app, db)
     init_db(app)
 
     app.register_blueprint(create_crud_routes(PerformerService, "/music/performers"))

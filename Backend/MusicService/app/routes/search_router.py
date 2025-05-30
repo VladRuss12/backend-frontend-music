@@ -4,7 +4,7 @@ from app.services.search_service import SearchService
 search_router = Blueprint('search', __name__)
 
 
-@search_router.route('/search', methods=['GET'])
+@search_router.route('/', methods=['GET'])
 def search():
     query = request.args.get('query', '')
 
@@ -17,7 +17,7 @@ def search():
     return jsonify(results)
 
 
-@search_router.route('/search/playlists', methods=['GET'])
+@search_router.route('/playlists', methods=['GET'])
 def search_playlists_route():
     query = request.args.get('query', '')
 
@@ -30,7 +30,7 @@ def search_playlists_route():
     return jsonify(playlists)
 
 
-@search_router.route('/search/tracks', methods=['GET'])
+@search_router.route('/tracks', methods=['GET'])
 def search_tracks_route():
     query = request.args.get('query', '')
 
@@ -43,7 +43,7 @@ def search_tracks_route():
     return jsonify(tracks)
 
 
-@search_router.route('/search/performers', methods=['GET'])
+@search_router.route('/performers', methods=['GET'])
 def search_performers_route():
     query = request.args.get('query', '')
 

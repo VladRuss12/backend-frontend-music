@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 from app.models.track_playlist import track_playlist
@@ -14,9 +14,10 @@ class Playlist(Base):
     user_id = Column(UUID(as_uuid=True), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    search_vector = Column(TSVECTOR)
+
     tracks = relationship(
         "Track",
         secondary=track_playlist,
         back_populates="playlists"
     )
-    __searchable__ = ['name']

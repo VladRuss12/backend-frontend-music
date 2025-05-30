@@ -1,11 +1,10 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, DateTime, Text, Enum
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 from app.models.enums import PerformerType
-
 
 class Performer(Base):
     __tablename__ = 'performers'
@@ -16,9 +15,9 @@ class Performer(Base):
     genre = Column(String)
     bio = Column(Text)
     avatar_url = Column(String)
-    members = Column(JSONB)  # Список участников, если это группа
+    members = Column(JSONB)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    tracks = relationship("Track", back_populates="performer")
+    search_vector = Column(TSVECTOR)
 
-    __searchable__ = ['name', 'genre']
+    tracks = relationship("Track", back_populates="performer")
