@@ -16,13 +16,15 @@ class Settings(BaseSettings):
     '/music': 'http://localhost:5002',
     '/recommendations': 'http://localhost:5003',
     '/chat': 'http://localhost:5004'
+    '/stream': 'http://localhost:5006'
 }'''
 
 SERVICE_MAP = {
     '/users': 'http://user-service:5001',
     '/music': 'http://music-service:5002',
     '/recommendations': 'http://recommendation-service:5003',
-    '/chat': 'http://ai-service:5004'
+    '/chat': 'http://ai-service:5004',
+    '/stream': 'http://stream-service:5006'
 }
 
 @lru_cache()

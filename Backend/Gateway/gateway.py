@@ -49,5 +49,10 @@ def recommendations_proxy(path=''):
 def chat_proxy():
     return proxy_request(SERVICE_MAP['/chat'])
 
+@app.route('/stream', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
+@app.route('/stream/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def stream_proxy(path=''):
+    return proxy_request(SERVICE_MAP['/stream'])
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5005, debug=True)
