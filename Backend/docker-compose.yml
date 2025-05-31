@@ -140,7 +140,7 @@ services:
       - DATABASE_URL=postgresql://postgres:1111@stream-db:5432/stream_service_db
       - FLASK_APP=main.py
     depends_on:
-      streaming-db:
+      stream-db:
         condition: service_healthy
     restart: on-failure
     healthcheck:
@@ -150,7 +150,7 @@ services:
       retries: 3
       start_period: 40s
 
-  streaming-db:
+  stream-db:
     image: postgres:15
     container_name: stream-db
     restart: always
@@ -161,7 +161,7 @@ services:
     ports:
       - "5436:5432"
     volumes:
-      - streaming_db_data:/var/lib/postgresql/data
+      - stream_db_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
@@ -198,3 +198,4 @@ volumes:
   user_db_data:
   music_db_data:
   recommendation_db_data:
+  stream_db_data:
