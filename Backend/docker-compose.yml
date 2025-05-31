@@ -130,6 +130,45 @@ services:
       timeout: 10s
       retries: 3
 
+
+  stream-service:
+    build: ./StreamService
+    container_name: stream-service
+    ports:
+      - "5006:5006"
+    environment:
+      - DATABASE_URL=postgresql://postgres:1111@stream-db:5432/stream_service_db
+      - FLASK_APP=main.py
+    depends_on:
+      streaming-db:
+        condition: service_healthy
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5006/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  streaming-db:
+    image: postgres:15
+    container_name: stream-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1111
+      POSTGRES_DB: stream_service_db
+    ports:
+      - "5436:5432"
+    volumes:
+      - streaming_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
   # Gateway
   gateway:
     build: ./Gateway
@@ -151,6 +190,9 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+
+
 
 volumes:
   user_db_data:
