@@ -16,13 +16,15 @@ def stream_file_upload():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-@stream_bp.route('/<file_id>', methods=['GET'])
-def stream_file(file_id):
-    try:
-        resp = StreamService.stream_file_response(file_id, request.headers.get('Range'))
-        return resp
-    except FileNotFoundError:
-        abort(404)
+@stream_bp.route('/files', methods=['GET'])
+def list_stream_files():
+    track_id = request.args.get('track_id')
+    q = StreamService.model.query
+    if track_id:
+        q = q.filter_by(track_id=track_id)
+    files = q.all()
+    schema = StreamFileSchema(many=True)
+    return jsonify(schema.dump(files))
 
 @stream_bp.route('/<file_id>/meta', methods=['GET'])
 def stream_file_meta(file_id):
@@ -31,3 +33,11 @@ def stream_file_meta(file_id):
         abort(404)
     schema = StreamFileSchema()
     return jsonify(schema.dump(file_record))
+
+@stream_bp.route('/<file_id>', methods=['GET'])
+def stream_file(file_id):
+    try:
+        resp = StreamService.stream_file_response(file_id, request.headers.get('Range'))
+        return resp
+    except FileNotFoundError:
+        abort(404)

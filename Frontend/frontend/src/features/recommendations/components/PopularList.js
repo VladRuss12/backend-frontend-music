@@ -24,7 +24,17 @@ export default function PopularList({
     loadPopular();
   }, [loadPopular]);
 
-  const popularEntities = ids.map(id => entities.find(e => e.id === id)).filter(Boolean);
+  const popularEntities = ids
+    .map(id => {
+      // Если id — строка, ищем по id
+      if (typeof id === "string") return entities.find(e => e.id === id);
+      // Если id — объект с .id, ищем по id
+      if (id && typeof id === "object" && id.id) return entities.find(e => e.id === id.id);
+      // Если id сам по себе объект с нужными полями (например, полный объект), возвращаем его
+      if (id && typeof id === "object" && id.title) return id;
+      return null;
+    })
+    .filter(Boolean);
 
   if (loadingIds || loadingEntities) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -61,7 +71,6 @@ export default function PopularList({
         >
           {popularEntities.map((entity) => (
             <Box key={entity.id} sx={{ mx: 2, minWidth: CARD_WIDTH, maxWidth: CARD_WIDTH }}>
-              {/* Универсальный способ */}
               <MusicCard item={entity} type={recommendationType} />
             </Box>
           ))}

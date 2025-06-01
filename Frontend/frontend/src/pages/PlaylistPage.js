@@ -1,68 +1,70 @@
-import React, { useEffect } from "react";
+import React, { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, List, ListItem, ListItemText, CircularProgress, Paper } from "@mui/material";
 import { useEntity } from "../features/music/hooks/useEntity";
-import { usePlayer } from "../features/music/context/PlayerContext"; 
+import { useDispatch, useSelector } from "react-redux";
+import { getEntityById } from "../features/music/entitiesSlice";
+import MusicTable from "../features/music/components/MusicTable";
+import { Box, Typography, Avatar } from "@mui/material";
+import placeholder from "../features/music/components/placeholder.svg";
 
 export default function PlaylistPage() {
-  const { playlistId } = useParams();
-  const { entity: playlist, loading, error } = useEntity('playlists', playlistId);
-  const { playTrack, currentTrack, isPlaying, pause, resume } = usePlayer();
+  const { id } = useParams();
+  const { entity: playlist, loading: playlistLoading, error: playlistError } = useEntity("playlists", id);
 
-  const handleTrackClick = (track) => {
-    if (!track) return;
-    if (currentTrack?.id === track.id) {
-      if (isPlaying) pause();
-      else resume();
-    } else {
-      playTrack(track);
+  const tracks = useSelector(state =>
+    playlist?.tracks?.map(tid =>
+      typeof tid === "string"
+        ? state.entities.entities.tracks?.byId?.[tid]
+        : tid && tid.id
+          ? state.entities.entities.tracks?.byId?.[tid.id]
+          : null
+    ).filter(Boolean) || []
+  );
+
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    if (playlist?.tracks) {
+      for (const tid of playlist.tracks) {
+        const id = typeof tid === "string" ? tid : tid && tid.id;
+        if (id && !tracks.find(t => t?.id === id)) {
+          dispatch(getEntityById({ entityType: "tracks", id }));
+        }
+      }
     }
-  };
+  }, [playlist, tracks, dispatch]);
 
-  if (loading) return <Box display="flex" justifyContent="center"><CircularProgress /></Box>;
-  if (error) return <Typography color="error">Ошибка загрузки плейлиста</Typography>;
-  if (!playlist) return <Typography>Плейлист не найден</Typography>;
+  if (playlistLoading) {
+    return <Typography sx={{ mt: 2 }}>Загрузка плейлиста...</Typography>;
+  }
+  if (playlistError) {
+    return <Typography sx={{ mt: 2, color: "error.main" }}>Ошибка: {playlistError}</Typography>;
+  }
+  if (!playlist) {
+    return <Typography sx={{ mt: 2 }}>Плейлист не найден</Typography>;
+  }
 
   return (
-    <Box maxWidth="md" mx="auto" mt={4}>
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
-          {playlist.name}
-        </Typography>
-        <Typography color="text.secondary" sx={{ mb: 2 }}>
-          {playlist.description || "Плейлист"}
-        </Typography>
-      </Paper>
-      <Typography variant="h6" gutterBottom>Треки:</Typography>
-      <List>
-        {(playlist.tracks || []).length === 0 && (
-          <Typography color="text.secondary">Нет треков в этом плейлисте</Typography>
-        )}
-        {(playlist.tracks || []).map(track => {
-          const isCurrent = currentTrack?.id === track.id;
-          return (
-            <ListItem
-              key={track.id}
-              button
-              onClick={() => handleTrackClick(track)}
-              selected={isCurrent}
-              sx={{
-                cursor: 'pointer',
-                bgcolor: isCurrent ? '#e8f5e9' : undefined,
-                transition: 'background 0.2s',
-                borderRadius: 1,
-                mb: 0.5,
-                boxShadow: isCurrent ? 3 : 0
-              }}
-            >
-              <ListItemText
-                primary={track.title}
-                secondary={track.performer?.name || "Исполнитель"}
-              />
-            </ListItem>
-          );
-        })}
-      </List>
+    <Box sx={{ mt: 4 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <Avatar
+          src={playlist.cover_url || placeholder}
+          variant="rounded"
+          sx={{ width: 80, height: 80, mr: 2 }}
+        />
+        <Box>
+          <Typography variant="h5">{playlist.name}</Typography>
+          {playlist.description && (
+            <Typography variant="body1" color="text.secondary">
+              {playlist.description}
+            </Typography>
+          )}
+        </Box>
+      </Box>
+      <Typography variant="subtitle1" sx={{ mb: 1 }}>
+        Треки в плейлисте:
+      </Typography>
+      <MusicTable items={tracks} type="track" showIndex={true} />
     </Box>
   );
 }

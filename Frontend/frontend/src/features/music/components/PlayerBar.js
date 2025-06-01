@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Box, IconButton, Typography, Slider, CircularProgress } from "@mui/material";
+import { Box, IconButton, Typography, Slider } from "@mui/material";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -13,7 +13,7 @@ import { useHistory } from "../../recommendations/hooks/useHistory";
 import placeholder from './placeholder.svg';
 
 export default function PlayerBar() {
-  const { currentTrack, isPlaying, pause, resume, audioRef } = usePlayer();
+  const { currentTrack, isPlaying, pause, resume, audioRef, audioUrl } = usePlayer();
   const { liked, like, unlike, loadLiked } = useLikes('track');
   const { addToHistory } = useHistory('track');
   const [duration, setDuration] = React.useState(0);
@@ -51,7 +51,7 @@ export default function PlayerBar() {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
     };
-  }, [audioRef, currentTrack]);
+  }, [audioRef, currentTrack, audioUrl]);
 
   // Перемотка
   const handleSeek = (event, value) => {
@@ -74,7 +74,6 @@ export default function PlayerBar() {
   };
 
   if (!currentTrack) return null;
-  console.log('liked:', liked, 'currentTrack:', currentTrack);
   return (
     <Box
       sx={{
@@ -119,7 +118,6 @@ export default function PlayerBar() {
 
       {/* Управление */}
       <Box sx={{ display: "flex", alignItems: "center", flex: 1, justifyContent: "center" }}>
-        {/* Кнопки предыдущего/следующего трека можно реализовать позже */}
         <IconButton disabled>
           <SkipPreviousIcon />
         </IconButton>

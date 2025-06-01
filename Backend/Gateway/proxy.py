@@ -1,5 +1,6 @@
 import requests
-from flask import request, jsonify, g
+from flask import request, Response, g
+
 from config import SERVICE_MAP
 
 def proxy_request(service_url):
@@ -12,33 +13,31 @@ def proxy_request(service_url):
 
     url = f"{service_url}{path}"
 
-    # Подготовка заголовков
-    headers = {}
-    for k, v in request.headers.items():
-        if k.lower() != 'host':
-            headers[k] = v
+    headers = {k: v for k, v in request.headers.items() if k.lower() != 'host'}
 
-    # Явно добавляем Authorization, если есть
     if 'Authorization' in request.headers:
         headers['Authorization'] = request.headers['Authorization']
 
-    # Добавляем X-User-ID, если установлен в g
     if getattr(g, "current_user_id", None):
         headers["X-User-ID"] = g.current_user_id
 
-    # Проксируем запрос
     resp = requests.request(
         method=request.method,
         url=url,
         headers=headers,
         data=request.get_data(),
         params=request.args,
-        cookies=request.cookies
+        cookies=request.cookies,
+        stream=True
     )
 
-    # Пытаемся вернуть JSON, иначе — как есть
-    try:
-        return jsonify(resp.json()), resp.status_code
-    except ValueError:
-        return resp.content, resp.status_code
 
+    excluded_headers = ['content-encoding', 'transfer-encoding', 'connection']
+    headers = [
+        (name, value)
+        for name, value in resp.raw.headers.items()
+        if name.lower() not in excluded_headers
+    ]
+
+    response = Response(resp.raw, resp.status_code, headers)
+    return response

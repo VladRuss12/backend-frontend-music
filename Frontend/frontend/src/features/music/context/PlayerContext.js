@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useRef, useState, useCallback } from "react";
+import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
+import { useStreamFileByTrackId } from "../../streaming/hooks/useStreamFileByTrackId";
 
 const PlayerContext = createContext();
 
@@ -11,29 +12,55 @@ export function PlayerProvider({ children }) {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const streamFile = useStreamFileByTrackId(currentTrack?.id);
+  const audioUrl = streamFile
+    ? `http://localhost:5005/stream/${streamFile.id}`
+    : null;
+
   const playTrack = useCallback((track) => {
+    console.log("[PlayerContext] playTrack called with:", track);
     setCurrentTrack(track);
     setIsPlaying(true);
   }, []);
 
-  const pause = useCallback(() => setIsPlaying(false), []);
-  const resume = useCallback(() => setIsPlaying(true), []);
+  const pause = useCallback(() => {
+    console.log("[PlayerContext] pause called");
+    setIsPlaying(false);
+  }, []);
 
-  React.useEffect(() => {
+  const resume = useCallback(() => {
+    console.log("[PlayerContext] resume called");
+    setIsPlaying(true);
+  }, []);
+
+  useEffect(() => {
+    console.log("[PlayerContext] currentTrack changed:", currentTrack);
+  }, [currentTrack]);
+
+  useEffect(() => {
+    console.log("[PlayerContext] audioUrl changed:", audioUrl);
+  }, [audioUrl]);
+
+  useEffect(() => {
+    console.log("[PlayerContext] isPlaying changed:", isPlaying);
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) {
-      audio.play().catch(()=>{});
+      audio.play().catch((e) => {
+        console.warn("[PlayerContext] audio.play() error:", e);
+      });
     } else {
       audio.pause();
     }
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying, audioUrl]);
 
-  // YouTube ссылки напрямую проигрывать нельзя через <audio>, нужен mp3/mp4 прямой url
-  // Для теста используем рандомный mp3 url (пример)
-  const getAudioUrl = (track) =>
-    track?.audio_url ||
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; // замените на любой открытый mp3
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) {
+      console.log("[PlayerContext] Reset audio.currentTime due to audioUrl change");
+      audio.currentTime = 0;
+    }
+  }, [audioUrl]);
 
   return (
     <PlayerContext.Provider value={{
@@ -43,13 +70,17 @@ export function PlayerProvider({ children }) {
       pause,
       resume,
       audioRef,
+      audioUrl,
     }}>
       {children}
       <audio
         ref={audioRef}
-        src={getAudioUrl(currentTrack)}
+        src={audioUrl}
         style={{ display: "none" }}
-        onEnded={() => setIsPlaying(false)}
+        onEnded={() => {
+          console.log("[PlayerContext] Audio ended");
+          setIsPlaying(false);
+        }}
       />
     </PlayerContext.Provider>
   );

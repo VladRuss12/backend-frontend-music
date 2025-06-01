@@ -5,6 +5,7 @@ import placeholder from './placeholder.svg';
 import { useSelector, useDispatch } from "react-redux";
 import { getEntityById } from "../entitiesSlice";
 import { getPerformerName } from "../misc/musicUtils";
+import { usePlayer } from "../context/PlayerContext"; 
 
 export default function MusicCard({ item, type }) {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function MusicCard({ item, type }) {
   const performersById = useSelector(
     (state) => state.entities.entities.performers?.byId || {}
   );
+  const { playTrack } = usePlayer?.() || {}; 
 
   useEffect(() => {
     if (type === "track" && item.performer_id && !performersById[item.performer_id]) {
@@ -37,9 +39,17 @@ export default function MusicCard({ item, type }) {
     to = `/performers/${item.id}`;
   }
 
+  const handleClick = () => {
+    if (type === "track" && playTrack) {
+      playTrack(item);
+    } else {
+      navigate(to);
+    }
+  };
+
   return (
     <Card sx={{ width: 200, mx: 1, flex: "0 0 auto", cursor: 'pointer' }}>
-      <CardActionArea onClick={() => navigate(to)}>
+      <CardActionArea onClick={handleClick}>
         <CardMedia
           component="img"
           height="140"

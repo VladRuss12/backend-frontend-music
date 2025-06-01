@@ -16,10 +16,10 @@ export function useEntity(entityType, id) {
   );
 
   useEffect(() => {
-    if (id && !entity) {
+    if (id && !entity && !error) {  
       dispatch(getEntityById({ entityType, id }));
     }
-  }, [dispatch, entityType, id, entity]);
+  }, [dispatch, entityType, id, entity, error]);
 
   return { entity, loading, error };
 }

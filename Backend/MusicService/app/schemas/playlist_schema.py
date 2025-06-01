@@ -1,6 +1,5 @@
 from marshmallow import Schema, fields
 from app.models.playlist_model import Playlist
-from app.schemas.track_schema import TrackSchema
 
 
 class PlaylistSchema(Schema):
@@ -8,7 +7,10 @@ class PlaylistSchema(Schema):
     name = fields.Str(required=True)
     user_id = fields.UUID(required=True)
     created_at = fields.DateTime()
-    tracks = fields.Nested(TrackSchema, many=True)
+    tracks = fields.Method("get_track_ids")
 
     class Meta:
         model = Playlist
+
+    def get_track_ids(self, obj):
+        return [str(track.id) for track in getattr(obj, "tracks", [])]
