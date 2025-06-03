@@ -2,101 +2,159 @@ from datetime import datetime
 from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from app.models.track_stats import TrackStats
-from app.models.playlist_stats import PlaylistStats
-from app.models.history_model import ListeningHistory, Like
-from app.external_clients.music_client import get_track_by_id
-from app.external_clients.music_client import get_playlist_by_id
+
+from app.models.media_stats import MediaStats
+from app.models.history_model import ListeningHistory
+from app.models.like_model import Like
+
+from app.services.enrichment_service import EnrichmentService
+
 class ListeningService:
+    """
+    Сервис для работы с историей прослушиваний и лайками любых медиа
+    """
+
     def __init__(self, db_session: Session, media_type: str):
-        """
-        :param db_session: активная сессия базы данных
-        :param media_type: тип медиа (track или playlist)
-        """
         self.db = db_session
         self.media_type = media_type
-        self.model_stats = TrackStats if media_type == "track" else PlaylistStats
-        self.model_history = ListeningHistory if media_type == "track" else None
-        self.model_like = Like if media_type == "track" else None
 
-    def add_history(self, user_id: UUID, media_id: UUID) -> ListeningHistory:
-        """Добавление истории для прослушивания"""
-        if self.media_type == "track":
-            get_track_by_id(media_id)
-        else:
-            get_playlist_by_id(media_id)
+    def _validate_media_exists(self, media_id: UUID):
+        media = EnrichmentService.enrich_media(self.media_type, [media_id]).get(str(media_id))
+        if not media:
+            raise ValueError(f"{self.media_type} with id {media_id} does not exist")
 
+    def _get_or_create_stats(self, media_id: UUID) -> MediaStats:
+        stats = (
+            self.db.query(MediaStats)
+            .filter_by(media_id=media_id, media_type=self.media_type)
+            .first()
+        )
+        if stats is None:
+            stats = MediaStats(
+                media_id=media_id,
+                media_type=self.media_type,
+                play_count=0,
+                like_count=0,
+            )
+            self.db.add(stats)
+            self.db.flush()
+        return stats
+
+    def add_history(self, user_id: UUID, media_id: UUID) -> dict:
+        """
+        Добавляет запись о прослушивании и обновляет статистику
+        """
+        self._validate_media_exists(media_id)
         try:
-            history = self.model_history(
+            history = ListeningHistory(
                 user_id=user_id,
-                track_id=media_id,
-                timestamp=datetime.utcnow()
+                media_id=media_id,
+                media_type=self.media_type,
+                timestamp=datetime.utcnow(),
             )
             self.db.add(history)
 
-            stats = self.db.query(self.model_stats).filter_by(track_id=media_id).first()
-            if stats:
-                stats.play_count += 1
-            else:
-                stats = self.model_stats(track_id=media_id, play_count=1)
-                self.db.add(stats)
+            stats = self._get_or_create_stats(media_id)
+            stats.play_count += 1
 
             self.db.commit()
             self.db.refresh(history)
-            return history
+
+            media_map = EnrichmentService.enrich_media(self.media_type, [media_id])
+            return {
+                "id": str(history.id),
+                "user_id": str(history.user_id),
+                "media_id": str(history.media_id),
+                "media_type": history.media_type,
+                "timestamp": history.timestamp,
+                "media": media_map.get(str(media_id)),
+            }
         except SQLAlchemyError as e:
             self.db.rollback()
             raise e
 
-    def like_media(self, user_id: UUID, media_id: UUID) -> Like:
-        """Лайк для медиа (трека или плейлиста)"""
-        if self.media_type == "track":
-            get_track_by_id(media_id)
-        else:
-            get_playlist_by_id(media_id)
-
+    def like_media(self, user_id: UUID, media_id: UUID) -> dict:
+        """
+        Ставит лайк на медиа и обновляет статистику
+        """
+        self._validate_media_exists(media_id)
         try:
-            existing = self.db.query(self.model_like).filter_by(user_id=user_id, track_id=media_id).first()
-            if existing:
-                existing.liked = True
-                existing.timestamp = datetime.utcnow()
+            like = (
+                self.db.query(Like)
+                .filter_by(user_id=user_id, media_id=media_id, media_type=self.media_type)
+                .first()
+            )
+            is_new_like = False
+            if like:
+                if not like.liked:
+                    like.liked = True
+                    like.timestamp = datetime.utcnow()
+                    is_new_like = True
             else:
-                existing = self.model_like(user_id=user_id, track_id=media_id, liked=True)
-                self.db.add(existing)
+                like = Like(
+                    user_id=user_id,
+                    media_id=media_id,
+                    media_type=self.media_type,
+                    liked=True,
+                    timestamp=datetime.utcnow(),
+                )
+                self.db.add(like)
+                is_new_like = True
 
-            # Обновление статистики
-            stats = self.db.query(self.model_stats).filter_by(track_id=media_id).first()
-            if stats:
+            if is_new_like:
+                stats = self._get_or_create_stats(media_id)
                 stats.like_count += 1
-            else:
-                stats = self.model_stats(track_id=media_id, like_count=1)
-                self.db.add(stats)
 
             self.db.commit()
-            return existing
+            self.db.refresh(like)
+
+            media_map = EnrichmentService.enrich_media(self.media_type, [media_id])
+            return {
+                "id": str(like.id),
+                "user_id": str(like.user_id),
+                "media_id": str(like.media_id),
+                "media_type": like.media_type,
+                "liked": like.liked,
+                "timestamp": like.timestamp,
+                "media": media_map.get(str(media_id)),
+            }
         except SQLAlchemyError as e:
             self.db.rollback()
             raise e
 
-    def unlike_media(self, user_id: UUID, media_id: UUID) -> Like | None:
-        """Удаление лайка для медиа"""
-        if self.media_type == "track":
-            get_track_by_id(media_id)
-        else:
-            get_playlist_by_id(media_id)
-
+    def unlike_media(self, user_id: UUID, media_id: UUID) -> dict | None:
+        """
+        Убирает лайк с медиа и обновляет статистику
+        """
+        self._validate_media_exists(media_id)
         try:
-            like = self.db.query(self.model_like).filter_by(user_id=user_id, track_id=media_id).first()
+            like = (
+                self.db.query(Like)
+                .filter_by(user_id=user_id, media_id=media_id, media_type=self.media_type)
+                .first()
+            )
             if like and like.liked:
                 like.liked = False
                 like.timestamp = datetime.utcnow()
 
-                stats = self.db.query(self.model_stats).filter_by(track_id=media_id).first()
-                if stats and stats.like_count > 0:
+                stats = self._get_or_create_stats(media_id)
+                if stats.like_count > 0:
                     stats.like_count -= 1
 
                 self.db.commit()
-            return like
+                self.db.refresh(like)
+
+                media_map = EnrichmentService.enrich_media(self.media_type, [media_id])
+                return {
+                    "id": str(like.id),
+                    "user_id": str(like.user_id),
+                    "media_id": str(like.media_id),
+                    "media_type": like.media_type,
+                    "liked": like.liked,
+                    "timestamp": like.timestamp,
+                    "media": media_map.get(str(media_id)),
+                }
+            return None
         except SQLAlchemyError as e:
             self.db.rollback()
             raise e

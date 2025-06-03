@@ -14,7 +14,7 @@ def get_user_id():
 def get_track_id():
     try:
         response = requests.get('http://music-service:5002/tracks/')
-        response.raise_for_status()  # поднимет HTTPError, если статус не 200
+        response.raise_for_status()
         tracks = response.json()
         if not tracks:
             raise RuntimeError("No tracks found")
@@ -32,3 +32,11 @@ def get_playlist_id():
         return choice(playlists)['id']
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Failed to get playlists: {e}")
+
+MEDIA_TYPES = ["track", "playlist"]
+def get_random_media():
+    media_type = choice(MEDIA_TYPES)
+    if media_type == "track":
+        return get_track_id(), "track"
+    else:
+        return get_playlist_id(), "playlist"

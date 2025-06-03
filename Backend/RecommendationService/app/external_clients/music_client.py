@@ -3,30 +3,20 @@ from uuid import UUID
 
 MUSIC_SERVICE_URL = "http://music-service:5002"
 
-def get_track_by_id(track_id: UUID):
-    response = requests.get(f"{MUSIC_SERVICE_URL}/music/tracks/{track_id}")
+def get_tracks_by_ids(track_ids: list[UUID]) -> list[dict]:
+    response = requests.post(
+        f"{MUSIC_SERVICE_URL}/music/tracks/batch",
+        json={"ids": [str(tid) for tid in track_ids]}
+    )
     if response.status_code == 200:
         return response.json()
-    else:
-        raise Exception(f"Track not found: {track_id}")
+    raise Exception(f"Failed to batch fetch tracks: {track_ids}")
 
-def get_all_tracks() -> list[dict]:
-    response = requests.get(f"{MUSIC_SERVICE_URL}/music/tracks")
+def get_playlists_by_ids(playlist_ids: list[UUID]) -> list[dict]:
+    response = requests.post(
+        f"{MUSIC_SERVICE_URL}/music/playlists/batch",
+        json={"ids": [str(pid) for pid in playlist_ids]}
+    )
     if response.status_code == 200:
         return response.json()
-    else:
-        raise Exception("Failed to fetch all tracks")
-
-def get_playlist_by_id(playlist_id: UUID):
-    response = requests.get(f"{MUSIC_SERVICE_URL}/music/playlists/{playlist_id}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Playlist not found: {playlist_id}")
-
-def get_all_playlists() -> list[dict]:
-    response = requests.get(f"{MUSIC_SERVICE_URL}/music/playlists")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception("Failed to fetch all playlists")
+    raise Exception(f"Failed to batch fetch playlists: {playlist_ids}")

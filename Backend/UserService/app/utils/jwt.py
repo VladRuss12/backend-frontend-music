@@ -29,7 +29,6 @@ def decode_token(token: str) -> dict | None:
 
 
 def get_user_from_token(token: str) -> User | None:
-    """Получение пользователя из JWT токена"""
     try:
         # Декодируем токен
         payload = jwt.decode(
@@ -47,5 +46,4 @@ def get_user_from_token(token: str) -> User | None:
         return db.session.get(User, UUID(user_id))
 
     except (JWTError, ValueError, Exception) as e:
-        # Логирование ошибки может быть добавлено здесь
         return None

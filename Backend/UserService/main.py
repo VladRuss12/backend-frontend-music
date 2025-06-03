@@ -21,6 +21,7 @@ def create_app():
 
     init_db(app)
     app.register_blueprint(users_bp, url_prefix="/users")
+    app.register_blueprint(batch_user_bp, url_prefix='/users')
     app.register_blueprint(auth_bp)
     return app
 

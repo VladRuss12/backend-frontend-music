@@ -2,7 +2,7 @@ from app.models.history_model import ListeningHistory
 from app.seeders.listening_history_seeder import generate_listening_history_seed
 from app.seeders.like_seeder import generate_like_seed
 from app.seeders.recommendation_seeder import generate_recommendation_seed
-from app.seeders.stats_seeder import generate_stats_seed
+from app.seeders.media_stats_seeder import generate_media_stats_seed
 
 
 def check_if_seeds_exist(session):
@@ -21,7 +21,7 @@ def generate_all_seeds(session):
         generate_recommendation_seed(session)
 
         print("Генерация Track и Playlist Stats")
-        generate_stats_seed(session)
+        generate_media_stats_seed(session)
 
         print("Сидер выполнен успешно!")
     else:

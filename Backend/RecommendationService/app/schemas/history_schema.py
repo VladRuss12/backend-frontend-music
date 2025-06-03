@@ -1,13 +1,11 @@
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import fields
-from app.models.history_model import ListeningHistory
+from marshmallow import Schema, fields
 
-class HistorySchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = ListeningHistory
-        load_instance = True
-
+class HistorySchema(Schema):
     id = fields.UUID(dump_only=True)
     user_id = fields.UUID(required=True)
-    track_id = fields.UUID(required=True)
+    media_id = fields.UUID(required=True)
+    media_type = fields.Str(required=True)
     timestamp = fields.DateTime(dump_only=True)
+
+    media = fields.Dict()
+    user = fields.Dict()
