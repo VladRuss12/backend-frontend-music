@@ -3,7 +3,7 @@ from marshmallow import ValidationError
 from uuid import UUID
 from app.services.batch_service import BatchUserService
 
-batch_user_bp = Blueprint("batch_users", __name__, url_prefix="/music")
+batch_user_bp = Blueprint("batch_users", __name__, url_prefix='/users')
 
 @batch_user_bp.route('/users/batch', methods=['POST'])
 def batch_users():

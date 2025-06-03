@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 
 from app.database.config import Config
 from app.database.database import db, init_db
-from app.routes import batch_router
+from app.routes.batch_router import batch_bp
 from app.services.performer_service import PerformerService
 from app.services.playlist_service import PlaylistService
 from app.routes.base_router import create_crud_routes
@@ -21,7 +21,7 @@ def create_app():
     app.register_blueprint(create_crud_routes(PlaylistService, "/music/playlists"))
     app.register_blueprint(create_crud_routes(TrackService, "/music/tracks"))
     app.register_blueprint(search_router, url_prefix='/music/search')
-    app.register_blueprint(batch_router, url_prefix='/music/')
+    app.register_blueprint(batch_bp, url_prefix='/music')
 
 
     @app.cli.command("seed")

@@ -3,7 +3,7 @@ from faker import Faker
 
 from app.database.database import db
 from app.models.user_model import User, UserRole
-from app.services.auth_service import hash_password
+from app.services.auth_service import AuthService
 
 fake = Faker()
 
@@ -34,7 +34,7 @@ def seed_users(session):
             user = User(
                 username=username,
                 email=email,
-                password_hash=hash_password(password),
+                password_hash=AuthService.hash_password(password),
                 role=role,
                 bio=bio,
                 avatar_url=avatar_url,

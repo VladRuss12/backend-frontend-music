@@ -1,24 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Typography, Box, Button } from "@mui/material";
-import { useEntities } from "../../music/hooks/useEntities";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MusicTable from "../../music/components/MusicTable";
 
+
 export default function HistoryList({ history, maxVisible = 5 }) {
-  const { items: tracks } = useEntities("tracks");
   const [expanded, setExpanded] = useState(false);
 
-  if (!history?.length) {
-    return <Typography color="textSecondary">Нет данных</Typography>;
-  }
-
-  const historyTracks = history
-    .map(item => tracks.find(t => t.id === item.track_id || t.id === item.id) || item.track)
-    .filter(Boolean);
+  // Извлекаем массив треков из поля media
+  const historyTracks = useMemo(
+    () =>
+      history
+        ?.map(item => item.media)
+        .filter(Boolean) ?? [],
+    [history]
+  );
 
   const visibleTracks = expanded ? historyTracks : historyTracks.slice(0, maxVisible);
   const hasMore = historyTracks.length > maxVisible;
+
+  if (!history || history.length === 0) {
+    return <Typography color="textSecondary">Нет данных</Typography>;
+  }
+
+  if (historyTracks.length === 0) {
+    return <Typography color="textSecondary">Нет данных по трекам из истории</Typography>;
+  }
 
   return (
     <>

@@ -4,7 +4,6 @@ import {
   Typography, Box
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { usePlayer } from "../context/PlayerContext";
 import { useNavigate } from "react-router-dom";
 import placeholder from './placeholder.svg';

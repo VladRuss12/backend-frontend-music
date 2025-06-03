@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from werkzeug.exceptions import NotFound, BadRequest
 
 def create_crud_routes(service, url_prefix: str, name: str = None):
-    # Используем url_prefix как имя, если не передано имя для blueprint
     bp_name = name or url_prefix.strip('/').replace('/', '_') or 'default_blueprint'
     bp = Blueprint(bp_name, __name__, url_prefix=f"/{url_prefix}")
 
@@ -11,6 +10,14 @@ def create_crud_routes(service, url_prefix: str, name: str = None):
         try:
             items = service.get_all()
             return jsonify(items)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @bp.get('/ids')
+    def get_all_ids():
+        try:
+            ids = service.get_all_ids()
+            return jsonify({"ids": ids})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 

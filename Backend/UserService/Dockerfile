@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Устанавливаем переменные окружения
-ENV FLASK_APP=main.py
+ENV FLASK_APP=main:create_app
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=5001
 ENV FLASK_ENV=development
@@ -18,4 +18,4 @@ ENV FLASK_ENV=development
 EXPOSE 5001
 
 # Выполняем миграции и запускаем приложение
-CMD ["sh", "-c", "flask db upgrade && flask seed && python main.py"]
+CMD flask db upgrade && flask seed && flask run --host=0.0.0.0 --port=5001

@@ -7,10 +7,12 @@ class AuthService:
     def __init__(self, session):
         self.session = session
 
-    def hash_password(self, password: str) -> str:
+    @staticmethod
+    def hash_password(password: str) -> str:
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-    def verify_password(self, password: str, hashed: str) -> bool:
+    @staticmethod
+    def verify_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
     def register_user(self, username, email, password, role="user"):

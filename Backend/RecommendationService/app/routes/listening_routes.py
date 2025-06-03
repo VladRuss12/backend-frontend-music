@@ -31,7 +31,9 @@ def add_history():
 
     data = request.get_json()
     media_id = UUID(data["media_id"])
-    media_type = data.get("media_type", "track")
+    media_type = (
+            data.get("media_type")
+    )
 
     service = ListeningService(get_session(), media_type)
     history = service.add_history(user_id, media_id)
@@ -45,7 +47,9 @@ def like_entity():
 
     data = request.get_json()
     media_id = UUID(data["media_id"])
-    media_type = data.get("media_type", "track")
+    media_type = (
+        data.get("media_type")
+    )
 
     service = ListeningService(get_session(), media_type)
     like = service.like_media(user_id, media_id)
@@ -59,7 +63,9 @@ def unlike_entity():
 
     data = request.get_json()
     media_id = UUID(data["media_id"])
-    media_type = data.get("media_type", "track")
+    media_type = (
+        data.get("media_type")
+    )
 
     service = ListeningService(get_session(), media_type)
     like = service.unlike_media(user_id, media_id)
@@ -74,7 +80,9 @@ def get_history_route():
     if isinstance(user_id, tuple):
         return user_id
 
-    media_type = request.args.get("media_type", "track")
+    media_type = (
+            request.args.get("media_type")
+            or request.args.get("entity_type"))
     session = get_session()
     history = get_history_by_user(session, user_id, media_type)
     return jsonify(history_list_schema.dump(history))
@@ -85,7 +93,9 @@ def get_liked_entities_route():
     if isinstance(user_id, tuple):
         return user_id
 
-    media_type = request.args.get("media_type", "track")
+    media_type = (
+            request.args.get("media_type")
+            or request.args.get("entity_type"))
     session = get_session()
     liked = get_liked_entities(session, user_id, media_type)
     return jsonify(like_list_schema.dump(liked))

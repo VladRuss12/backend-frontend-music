@@ -4,7 +4,7 @@ from random import choice
 
 def get_user_id():
     try:
-        response = requests.get('http://user-service:5001/users/all_users')
+        response = requests.get('http://user-service:5001/users/')
         if response.status_code == 200:
             return choice(response.json())['id']
     except requests.exceptions.RequestException as e:
@@ -13,7 +13,7 @@ def get_user_id():
 
 def get_track_id():
     try:
-        response = requests.get('http://music-service:5002/tracks/')
+        response = requests.get('http://music-service:5002/music/tracks/')
         response.raise_for_status()
         tracks = response.json()
         if not tracks:
@@ -24,7 +24,7 @@ def get_track_id():
 
 def get_playlist_id():
     try:
-        response = requests.get('http://music-service:5002/playlists/')
+        response = requests.get('http://music-service:5002/music/playlists/')
         response.raise_for_status()
         playlists = response.json()
         if not playlists:

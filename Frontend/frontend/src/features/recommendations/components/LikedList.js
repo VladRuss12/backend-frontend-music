@@ -3,12 +3,10 @@ import { Typography, CircularProgress, Box, Button } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useLikes } from '../hooks/useLikes';
-import { useEntities } from "../../music/hooks/useEntities";
 import MusicTable from "../../music/components/MusicTable";
 
 export default function LikedList({ entityType = 'track', maxVisible = 5 }) {
   const { liked, loading, error, loadLiked } = useLikes(entityType);
-  const { items: tracks } = useEntities("tracks");
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
@@ -17,11 +15,9 @@ export default function LikedList({ entityType = 'track', maxVisible = 5 }) {
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
-  if (!liked.length) return <Typography>Пока нет лайков</Typography>;
+  if (!liked?.length) return <Typography>Пока нет лайков</Typography>;
 
-  const likedTracks = liked
-    .map(item => tracks.find(t => t.id === item.entity_id || t.id === item.id) || item.track)
-    .filter(Boolean);
+  const likedTracks = liked.map(item => item.media).filter(Boolean);
 
   const visibleTracks = expanded ? likedTracks : likedTracks.slice(0, maxVisible);
   const hasMore = likedTracks.length > maxVisible;

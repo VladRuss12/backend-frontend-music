@@ -3,11 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   popular: {},
   loading: {},
-  loaded: {},    
+  loaded: {},
   error: {},
   liked: [],
   history: [],
-  items: [] // <----- добавьте, если его ещё нет
+  items: []
 };
 
 const recommendationsSlice = createSlice({
@@ -19,31 +19,28 @@ const recommendationsSlice = createSlice({
       state.popular[entityType] = ids;
     },
     setLoading: (state, action) => {
-      const entityType = action.payload;
-      state.loading[entityType] = true;
-      state.error[entityType] = null;    
+      const mediaType = action.payload;
+      state.loading[mediaType] = true;
+      state.error[mediaType] = null;
     },
     setLoaded: (state, action) => {
       const entityType = action.payload;
       state.loading[entityType] = false;
-      state.loaded[entityType] = true;   
+      state.loaded[entityType] = true;
     },
     setError: (state, action) => {
       const entityType = action.payload?.entityType;
       const error = action.payload?.error;
       if (entityType) state.error[entityType] = error;
-      state.loading[entityType] = false; 
-      state.loaded[entityType] = false;  
+      state.loading[entityType] = false;
+      state.loaded[entityType] = false;
     },
     setLiked: (state, action) => {
-      if (state.liked !== action.payload) {
-        state.liked = action.payload || [];
-      }
+      state.liked = action.payload || [];
     },
-    setHistory: (state, action) => {   
+    setHistory: (state, action) => {
       state.history = action.payload || [];
     },
-    // --- добавьте этот редьюсер ---
     setRecommendations: (state, action) => {
       state.items = action.payload || [];
     }

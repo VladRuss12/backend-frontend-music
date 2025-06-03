@@ -5,7 +5,7 @@ import { fetchPopularRecommendations } from '../recommendationsService';
 
 export function usePopularRecommendations(entityType = 'track', limit = 10) {
   const dispatch = useDispatch();
-  // теперь ids и loading берём по типу!
+
   const ids = useSelector(state => state.recommendations.popular[entityType] || []);
   const loading = useSelector(state => state.recommendations.loading[entityType]);
   const error = useSelector(state => state.recommendations.error[entityType]);

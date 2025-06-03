@@ -11,7 +11,7 @@ from app.utils.roles import role_required
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from uuid import UUID
 
-users_bp = Blueprint("users", __name__, url_prefix="/users")
+users_bp = Blueprint("users", __name__)
 
 @users_bp.route("/<uuid:user_id>", methods=["GET"])
 def get_user(user_id: UUID):

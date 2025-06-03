@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.external_clients.music_client import get_all_track_ids
 from app.models.media_stats import MediaStats
 from app.models.recommendation_model import Recommendation
 from app.services.enrichment_service import EnrichmentService
@@ -24,7 +25,9 @@ class RecommendationService:
         )
 
         entities_meta = [e["media"] for e in liked_entities + history_entities if e.get("media")]
-        all_entities = list(EnrichmentService.enrich_media(entity_type, []).values())  # Получить все сущности
+
+        all_ids = get_all_track_ids()
+        all_entities = list(EnrichmentService.enrich_media(entity_type, all_ids).values())
 
         preferred_genres = Counter()
         preferred_artists = Counter()

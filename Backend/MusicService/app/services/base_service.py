@@ -22,6 +22,16 @@ class BaseService:
             raise e
 
     @classmethod
+    def get_all_ids(cls):
+        try:
+            db_session = db.session
+            ids = [str(obj.id) for obj in db_session.query(cls.model.id).all()]
+            return ids
+        except Exception as e:
+            current_app.logger.exception(f"Error in get_all_ids for {cls.model.__name__}: {str(e)}")
+            raise e
+
+    @classmethod
     def get_by_id(cls, object_id):
         try:
             db_session = db.session

@@ -18,14 +18,20 @@ def recommend_for_user():
     except ValueError:
         return jsonify({"message": "Invalid UUID in X-User-ID header"}), 400
 
-    entity_type = request.args.get("media_type", "track")
+    entity_type = (
+            request.args.get("media_type")
+            or request.args.get("entity_type")
+    )
     service = RecommendationService(get_session())
     recommendations = service.recommend_for_user(user_uuid, entity_type)
     return jsonify(recommendation_list_schema.dump(recommendations))
 
 @recommendation_bp.get("/popular")
 def get_popular():
-    entity_type = request.args.get("media_type", "track")
+    entity_type = (
+            request.args.get("media_type")
+            or request.args.get("entity_type")
+    )
     limit = int(request.args.get("limit", 10))
 
     service = RecommendationService(get_session())

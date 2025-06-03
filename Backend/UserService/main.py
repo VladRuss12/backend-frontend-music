@@ -3,8 +3,9 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from app.database.config import Config
 from app.database.database import init_db, db
-from app.routes.user_routes import bp as users_bp
+from app.routes.user_routes import users_bp
 from app.routes.auth_routes import auth_bp
+from app.routes.batch_router import batch_user_bp
 from app.seeder.user_seeder import seed_users
 from flask.cli import with_appcontext
 from app.utils.config import get_settings
@@ -21,7 +22,7 @@ def create_app():
 
     init_db(app)
     app.register_blueprint(users_bp, url_prefix="/users")
-    app.register_blueprint(batch_user_bp, url_prefix='/users')
+    app.register_blueprint(batch_user_bp)
     app.register_blueprint(auth_bp)
     return app
 

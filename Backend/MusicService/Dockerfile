@@ -13,7 +13,7 @@ COPY migrations ./migrations
 COPY . .
 
 # Устанавливаем переменные окружения для Flask
-ENV FLASK_APP=main.py
+ENV FLASK_APP=main:create_app
 ENV FLASK_RUN_PORT=5002
 ENV FLASK_ENV=development
 
@@ -21,4 +21,4 @@ ENV FLASK_ENV=development
 EXPOSE 5002
 
 # Выполняем миграции через Flask и запускаем приложение
-CMD ["sh", "-c", "flask db upgrade && flask seed && python main.py"]
+CMD flask db upgrade && flask seed && flask run --host=0.0.0.0 --port=5002

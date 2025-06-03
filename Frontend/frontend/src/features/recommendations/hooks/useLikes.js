@@ -4,7 +4,7 @@ import { fetchLikedEntities, likeEntity, unlikeEntity } from '../recommendations
 import { useCallback } from 'react';
 import { useIsAuthenticated } from '../../auth/hooks/useIsAuthenticated';
 
-export function useLikes(entityType = 'track') {
+export function useLikes(mediaType = 'track') {
   const dispatch = useDispatch();
   const loading = useSelector(state => state.recommendations.loading['liked']);
   const error = useSelector(state => state.recommendations.error['liked']);
@@ -16,7 +16,7 @@ export function useLikes(entityType = 'track') {
     if (!isAuthenticated) return;
     dispatch(setLoading('liked'));
     try {
-      const data = await fetchLikedEntities(entityType);
+      const data = await fetchLikedEntities(mediaType);
       dispatch(setLiked(data));
       dispatch(setError({ entityType: 'liked', error: null }));
     } catch (e) {
@@ -24,38 +24,39 @@ export function useLikes(entityType = 'track') {
     } finally {
       dispatch(setLoaded('liked'));
     }
-  }, [dispatch, entityType, isAuthenticated]);
+  }, [dispatch, mediaType, isAuthenticated]);
 
-  // Оптимистичное добавление лайка
-  const like = useCallback(async (entityId) => {
-    if (!isAuthenticated) return;
-    const already = liked?.some(item => item.entity_id === entityId);
-    if (already) return; // уже лайкнуто
+ // Оптимистичное добавление лайка
+const like = useCallback(async (mediaId, mediaObj) => {
+  if (!isAuthenticated) return;
+  const already = liked?.some(item => item.media_id === mediaId);
+  if (already) return;
 
-    const optimisticLiked = [...(liked || []), { entity_id: entityId, entity_type: entityType }];
-    dispatch(setLiked(optimisticLiked));
-    try {
-      await likeEntity({ entityId, entityType });
-    } catch (e) {
-      // Откатываем, если ошибка
-      dispatch(setLiked(liked));
-      dispatch(setError({ entityType: 'liked', error: 'Не удалось лайкнуть' }));
-    }
-  }, [entityType, isAuthenticated, liked, dispatch]);
+  // Оптимистично добавляем с media
+  const optimisticLiked = [
+    ...(liked || []),
+    { media_id: mediaId, media_type: mediaType, liked: true, media: mediaObj }
+  ];
+  dispatch(setLiked(optimisticLiked));
+  try {
+    await likeEntity({ mediaId, mediaType });
+  } catch (e) {
+    dispatch(setLiked(liked));
+    dispatch(setError({ entityType: 'liked', error: 'Не удалось лайкнуть' }));
+  }
+}, [mediaType, isAuthenticated, liked, dispatch]);
 
-  // Оптимистичное удаление лайка
-  const unlike = useCallback(async (entityId) => {
-    if (!isAuthenticated) return;
-    const optimisticLiked = (liked || []).filter(item => item.entity_id !== entityId);
-    dispatch(setLiked(optimisticLiked));
-    try {
-      await unlikeEntity({ entityId, entityType });
-    } catch (e) {
-      // Откатываем, если ошибка
-      dispatch(setLiked(liked));
-      dispatch(setError({ entityType: 'liked', error: 'Не удалось убрать лайк' }));
-    }
-  }, [entityType, isAuthenticated, liked, dispatch]);
-
-  return { liked, loading, error, loadLiked, like, unlike };
+// Оптимистичное удаление лайка
+const unlike = useCallback(async (mediaId) => {
+  if (!isAuthenticated) return;
+  const optimisticLiked = (liked || []).filter(item => item.media_id !== mediaId);
+  dispatch(setLiked(optimisticLiked));
+  try {
+    await unlikeEntity({ mediaId, mediaType });
+  } catch (e) {
+    dispatch(setLiked(liked));
+    dispatch(setError({ entityType: 'liked', error: 'Не удалось убрать лайк' }));
+  }
+}, [mediaType, isAuthenticated, liked, dispatch]);
+return { liked, loading, error, loadLiked, like, unlike };
 }

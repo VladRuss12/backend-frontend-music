@@ -20,10 +20,10 @@ export default function PlayerBar() {
   const [position, setPosition] = React.useState(0);
   const [seeking, setSeeking] = React.useState(false);
 
-  // Добавляем в историю при начале проигрывания нового трека
   const prevTrackId = useRef();
   useEffect(() => {
     if (currentTrack?.id && prevTrackId.current !== currentTrack.id) {
+      console.log('Try addToHistory', currentTrack.id);
       addToHistory(currentTrack.id);
       prevTrackId.current = currentTrack.id;
     }
@@ -35,8 +35,7 @@ export default function PlayerBar() {
   }, [currentTrack, loadLiked]);
 
   // Получаем статус лайка для текущего трека
-  const isLiked = liked?.some(item => item.entity_id === currentTrack?.id);
-
+  const isLiked = liked?.some(item => item.media_id === currentTrack?.id);
   // Время и прогресс
   useEffect(() => {
     const audio = audioRef.current;
@@ -70,7 +69,7 @@ export default function PlayerBar() {
   const handleLikeClick = () => {
     if (!currentTrack?.id) return;
     if (isLiked) unlike(currentTrack.id);
-    else like(currentTrack.id);
+    else like(currentTrack.id, currentTrack); // обязательно передать объект трека
   };
 
   if (!currentTrack) return null;

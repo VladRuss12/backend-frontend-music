@@ -20,3 +20,11 @@ def get_playlists_by_ids(playlist_ids: list[UUID]) -> list[dict]:
     if response.status_code == 200:
         return response.json()
     raise Exception(f"Failed to batch fetch playlists: {playlist_ids}")
+
+
+def get_all_track_ids() -> list[UUID]:
+    response = requests.get(f"{MUSIC_SERVICE_URL}/music/tracks/ids")
+    if response.status_code == 200:
+        return [UUID(i) for i in response.json()["ids"]]
+    raise Exception("Failed to fetch all track ids")
+
