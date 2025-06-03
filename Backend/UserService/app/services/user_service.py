@@ -3,39 +3,26 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.models.user_model import User
 from sqlalchemy.orm import Session
 
-def get_user_by_id(user_id: uuid.UUID, session: Session) -> dict | None:
+def get_user_by_id(user_id: uuid.UUID, session: Session) -> User | None:
     try:
-        user = session.query(User).filter_by(id=user_id).first()
-        if user:
-            return {
-                "id": str(user.id),
-                "username": user.username,
-                "email": user.email,
-                "role": user.role,
-                "bio": user.bio,
-                "avatar_url": user.avatar_url,
-            }
-        return None
+        return session.query(User).filter_by(id=user_id).first()
     except SQLAlchemyError as e:
         print(f"[get_user_by_id] DB Error: {e}")
         return None
 
-def get_user_by_email(email: str, session: Session) -> dict | None:
+def get_user_by_email(email: str, session: Session) -> User | None:
     try:
-        user = session.query(User).filter_by(email=email).first()
-        if user:
-            return {
-                "id": str(user.id),
-                "username": user.username,
-                "email": user.email,
-                "role": user.role,
-                "bio": user.bio,
-                "avatar_url": user.avatar_url,
-            }
-        return None
+        return session.query(User).filter_by(email=email).first()
     except SQLAlchemyError as e:
         print(f"[get_user_by_email] DB Error: {e}")
         return None
+
+def get_all_users(session: Session) -> list[User]:
+    try:
+        return session.query(User).all()
+    except SQLAlchemyError as e:
+        print(f"[get_all_users] DB Error: {e}")
+        return []
 
 def create_user(user_data: dict, session: Session) -> uuid.UUID | None:
     try:

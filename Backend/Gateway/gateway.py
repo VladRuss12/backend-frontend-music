@@ -15,18 +15,21 @@ CORS(
 
 settings = get_settings()
 
+# --- Public Auth ---
 @app.route('/auth/register', methods=['POST'])
 @app.route('/auth/login', methods=['POST'])
-def public_users_proxy():
+@app.route('/auth/refresh', methods=['POST'])
+def public_auth_proxy():
     return proxy_request(SERVICE_MAP['/users'])
 
-
-@app.route('/users', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
+# --- User Service ---
+@app.route('/users', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/users/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @jwt_required(inject_user_id=False)
-def protected_users_proxy(path=''):
+def users_proxy(path=''):
     return proxy_request(SERVICE_MAP['/users'])
 
+# --- Music Service ---
 @app.route('/music', defaults={'path': ''}, methods=['GET'])
 @app.route('/music/<path:path>', methods=['GET'])
 def public_music_proxy(path=''):
@@ -38,17 +41,20 @@ def public_music_proxy(path=''):
 def protected_music_proxy(path=''):
     return proxy_request(SERVICE_MAP['/music'])
 
+# --- Recommendations ---
 @app.route('/recommendations', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/recommendations/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @jwt_required()
 def recommendations_proxy(path=''):
     return proxy_request(SERVICE_MAP['/recommendations'])
 
+# --- Chat ---
 @app.route('/chat', methods=['POST'])
 @jwt_required(inject_user_id=False)
 def chat_proxy():
     return proxy_request(SERVICE_MAP['/chat'])
 
+# --- Stream ---
 @app.route('/stream', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE'])
 @app.route('/stream/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def stream_proxy(path=''):
