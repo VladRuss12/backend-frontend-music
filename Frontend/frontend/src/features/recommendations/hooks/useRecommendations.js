@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback } from 'react';
-import { setRecommendations, setLoading,setLoaded, setError } from '../recommendationsSlice';
+import { setRecommendations, setLoading, setError } from '../recommendationsSlice';
 import { fetchRecommendations } from '../recommendationsService';
 
 // Для персональных рекомендаций
@@ -15,7 +15,7 @@ export function useRecommendations(userId) {
     dispatch(setLoading(true));
     try {
       const data = await fetchRecommendations(userId);
-      dispatch(setRecommendations(data));
+      dispatch(setRecommendations(data)); 
       dispatch(setError(null));
     } catch (e) {
       dispatch(setError('Ошибка загрузки рекомендаций'));

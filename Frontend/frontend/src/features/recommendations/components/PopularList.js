@@ -3,7 +3,6 @@ import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { usePopularRecommendations } from "../hooks/usePopularRecommendations";
-import { useEntities } from "../../music/hooks/useEntities";
 import MusicCard from "../../music/components/MusicCard"; 
 
 const CARD_WIDTH = 200;
@@ -11,34 +10,20 @@ const CARD_MARGIN = 16;
 const STEP = CARD_WIDTH + CARD_MARGIN * 2;
 
 export default function PopularList({
-  entityType,           // "tracks" | "playlists"
   recommendationType,   // "track" | "playlist"
   title,
   emptyText = "Нет данных"
 }) {
-  const { ids = [], loading: loadingIds, error, loadPopular } = usePopularRecommendations(recommendationType, 15);
-  const { items: entities, loading: loadingEntities } = useEntities(entityType);
+  const { recommendations = [], loading, error, loadPopular } = usePopularRecommendations(recommendationType, 15);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     loadPopular();
   }, [loadPopular]);
 
-  const popularEntities = ids
-    .map(id => {
-      // Если id — строка, ищем по id
-      if (typeof id === "string") return entities.find(e => e.id === id);
-      // Если id — объект с .id, ищем по id
-      if (id && typeof id === "object" && id.id) return entities.find(e => e.id === id.id);
-      // Если id сам по себе объект с нужными полями (например, полный объект), возвращаем его
-      if (id && typeof id === "object" && id.title) return id;
-      return null;
-    })
-    .filter(Boolean);
-
-  if (loadingIds || loadingEntities) return <CircularProgress />;
+  if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
-  if (!popularEntities || popularEntities.length === 0) return <Typography>{emptyText}</Typography>;
+  if (!recommendations || recommendations.length === 0) return <Typography>{emptyText}</Typography>;
 
   const scrollBy = (offset) => {
     const scroller = scrollRef.current;
@@ -69,9 +54,10 @@ export default function PopularList({
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {popularEntities.map((entity) => (
-            <Box key={entity.id} sx={{ mx: 2, minWidth: CARD_WIDTH, maxWidth: CARD_WIDTH }}>
-              <MusicCard item={entity} type={recommendationType} />
+          {recommendations.map((rec) => (
+            rec.media &&
+            <Box key={rec.media_id || rec.media.id} sx={{ mx: 2, minWidth: CARD_WIDTH, maxWidth: CARD_WIDTH }}>
+              <MusicCard item={rec.media} type={recommendationType} />
             </Box>
           ))}
         </Box>

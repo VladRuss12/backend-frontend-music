@@ -1,6 +1,5 @@
 import axiosInstance from '../../api/axiosInstance';
 
-// Получить рекомендации (пример, если нужно)
 export const fetchRecommendations = async (userId, mediaType = "track") => {
   const res = await axiosInstance.get(
     `/recommendations/user`,
@@ -12,7 +11,7 @@ export const fetchRecommendations = async (userId, mediaType = "track") => {
   return res.data;
 };
 
-// Получить популярные треки/плейлисты
+// Получить популярные треки или плейлисты
 export const fetchPopularRecommendations = async (mediaType = 'track', limit = 10) => {
   const res = await axiosInstance.get(`/recommendations/popular`, {
     params: { media_type: mediaType, limit }
@@ -20,65 +19,45 @@ export const fetchPopularRecommendations = async (mediaType = 'track', limit = 1
   return res.data;
 };
 
-// Получить историю
-export const fetchHistory = async (userId, mediaType = 'track') => {
+// Получить историю прослушиваний пользователя
+export const fetchHistory = async (mediaType = 'track') => {
   const res = await axiosInstance.get(`/recommendations/listening/history`, {
-    headers: { "X-User-ID": userId },
     params: { media_type: mediaType }
   });
   return res.data;
 };
 
-// Добавить в историю
-export const addHistory = async ({ userId, mediaId, mediaType = 'track' }) => {
-  const res = await axiosInstance.post(
-    `/recommendations/listening/history`,
-    {
-      media_id: mediaId,
-      media_type: mediaType,
-    },
-    {
-      headers: { "X-User-ID": userId }
-    }
-  );
+// Добавить в историю прослушивания пользователя
+export const addHistory = async ({ mediaId, mediaType = 'track' }) => {
+  const res = await axiosInstance.post(`/recommendations/listening/history`, {
+    media_id: mediaId,
+    media_type: mediaType,
+  });
   return res.data;
 };
 
-// Поставить лайк
-export const likeEntity = async ({ userId, mediaId, mediaType = 'track' }) => {
-  const res = await axiosInstance.post(
-    `/recommendations/listening/like`,
-    {
-      media_id: mediaId,
-      media_type: mediaType,
-    },
-    {
-      headers: { "X-User-ID": userId }
-    }
-  );
+// Поставить лайк треку или плейлисту
+export const likeEntity = async ({ mediaId, mediaType = 'track' }) => {
+  const res = await axiosInstance.post(`/recommendations/listening/like`, {
+    media_id: mediaId,
+    media_type: mediaType,
+  });
   return res.data;
 };
 
 // Убрать лайк
-export const unlikeEntity = async ({ userId, mediaId, mediaType = 'track' }) => {
-  const res = await axiosInstance.post(
-    `/recommendations/listening/unlike`,
-    {
-      media_id: mediaId,
-      media_type: mediaType,
-    },
-    {
-      headers: { "X-User-ID": userId }
-    }
-  );
+export const unlikeEntity = async ({ mediaId, mediaType = 'track' }) => {
+  const res = await axiosInstance.post(`/recommendations/listening/unlike`, {
+    media_id: mediaId,
+    media_type: mediaType,
+  });
   return res.data;
 };
 
 // Получить лайкнутые сущности
-export const fetchLikedEntities = async (userId, mediaType = 'track') => {
+export const fetchLikedEntities = async (mediaType = 'track') => {
   const res = await axiosInstance.get(`/recommendations/listening/liked`, {
-    headers: { "X-User-ID": userId },
     params: { media_type: mediaType }
   });
-  return res.data;
+  return res.data; 
 };

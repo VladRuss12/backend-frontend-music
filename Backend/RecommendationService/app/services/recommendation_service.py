@@ -76,4 +76,15 @@ class RecommendationService:
         )
         ids = [stat.media_id for stat in stats]
         media_map = EnrichmentService.enrich_media(entity_type, ids)
-        return [media_map.get(str(mid)) for mid in ids if media_map.get(str(mid))]
+        return [
+            {
+                "id": None,
+                "user_id": None,
+                "media_id": mid,
+                "media_type": entity_type,
+                "recommended_at": None,
+                "media": media_map.get(str(mid)),
+                "user": None,
+            }
+            for mid in ids if media_map.get(str(mid))
+        ]

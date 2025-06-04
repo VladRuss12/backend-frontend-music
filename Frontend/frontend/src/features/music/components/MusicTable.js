@@ -4,12 +4,13 @@ import {
   Typography, Box
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import { usePlayer } from "../context/PlayerContext";
 import { useNavigate } from "react-router-dom";
 import placeholder from './placeholder.svg';
 import { useSelector, useDispatch } from "react-redux";
 import { getEntityById } from "../entitiesSlice"; 
-import { getPerformerName } from "../misc/musicUtils";
+import { getPerformerName } from "../misc/musicUtils.js";
 
 function formatDuration(seconds) {
   if (!seconds && seconds !== 0) return "--:--";

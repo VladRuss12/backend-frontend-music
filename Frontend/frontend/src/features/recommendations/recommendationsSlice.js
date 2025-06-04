@@ -15,8 +15,8 @@ const recommendationsSlice = createSlice({
   initialState,
   reducers: {
     setPopular: (state, action) => {
-      const { entityType, ids } = action.payload;
-      state.popular[entityType] = ids;
+      const { entityType, recommendations } = action.payload;
+      state.popular[entityType] = recommendations; // теперь тут массив объектов!
     },
     setLoading: (state, action) => {
       const mediaType = action.payload;

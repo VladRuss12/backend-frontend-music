@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback } from 'react';
-import { setPopular, setLoading,setLoaded, setError } from '../recommendationsSlice';
+import { setPopular, setLoading, setLoaded, setError } from '../recommendationsSlice';
 import { fetchPopularRecommendations } from '../recommendationsService';
 
 export function usePopularRecommendations(entityType = 'track', limit = 10) {
   const dispatch = useDispatch();
 
-  const ids = useSelector(state => state.recommendations.popular[entityType] || []);
+  const recommendations = useSelector(state => state.recommendations.popular[entityType] || []);
   const loading = useSelector(state => state.recommendations.loading[entityType]);
   const error = useSelector(state => state.recommendations.error[entityType]);
 
@@ -14,8 +14,7 @@ export function usePopularRecommendations(entityType = 'track', limit = 10) {
     dispatch(setLoading(entityType));
     try {
       const data = await fetchPopularRecommendations(entityType, limit);
-      const onlyIds = data.map(item => item.id);
-      dispatch(setPopular({ entityType, ids: onlyIds }));
+      dispatch(setPopular({ entityType, recommendations: data })); // сохраняем массив объектов!
       dispatch(setError({ entityType, error: null }));
     } catch (e) {
       dispatch(setError({ entityType, error: 'Ошибка загрузки популярных' }));
@@ -24,5 +23,5 @@ export function usePopularRecommendations(entityType = 'track', limit = 10) {
     }
   }, [dispatch, entityType, limit]);
 
-  return { ids, loading, error, loadPopular };
+  return { recommendations, loading, error, loadPopular };
 }

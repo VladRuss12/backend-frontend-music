@@ -40,4 +40,4 @@ def get_popular():
     except ValueError:
         return jsonify({"message": "Unsupported media_type"}), 400
 
-    return jsonify(recommendation_list_schema.dump(popular))
+    return jsonify(popular)

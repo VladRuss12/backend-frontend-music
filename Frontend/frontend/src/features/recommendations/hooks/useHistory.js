@@ -1,5 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { setHistory, setLoading, setLoaded, setError } from '../recommendationsSlice';import { fetchHistory, addHistory } from '../recommendationsService';
+import { setHistory, setLoading, setLoaded, setError } from '../recommendationsSlice';
+import { fetchHistory, addHistory } from '../recommendationsService';
 import { useCallback } from 'react';
 
 export function useHistory(mediaType = 'track') {
@@ -14,7 +15,8 @@ export function useHistory(mediaType = 'track') {
     if (!userId) return;
     dispatch(setLoading(mediaType));
     try {
-      const data = await fetchHistory(userId, mediaType);
+
+      const data = await fetchHistory(mediaType);
       dispatch(setHistory(data));
       dispatch(setError({ entityType: mediaType, error: null }));
     } catch (e) {
@@ -25,10 +27,9 @@ export function useHistory(mediaType = 'track') {
   }, [dispatch, userId, mediaType]);
 
   const addToHistory = useCallback(async (mediaId) => {
-    console.log("addToHistory called, userId:", userId, "mediaId:", mediaId, "mediaType:", mediaType);
     if (!userId) return;
     try {
-      await addHistory({ userId, mediaId, mediaType });
+      await addHistory({ mediaId, mediaType });
       loadHistory();
     } catch (e) {
       dispatch(setError({ entityType: mediaType, error: 'Ошибка добавления в историю' }));

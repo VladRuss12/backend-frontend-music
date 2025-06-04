@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { useStreamFileByTrackId } from "../../streaming/hooks/useStreamFileByTrackId";
 
 const PlayerContext = createContext();
@@ -18,36 +26,37 @@ export function PlayerProvider({ children }) {
     : null;
 
   const playTrack = useCallback((track) => {
-    console.log("[PlayerContext] playTrack called with:", track);
-    setCurrentTrack(track);
+    setCurrentTrack((prev) => {
+      if (prev && prev.id === track.id) return prev;
+      return track;
+    });
     setIsPlaying(true);
   }, []);
 
   const pause = useCallback(() => {
-    console.log("[PlayerContext] pause called");
     setIsPlaying(false);
   }, []);
 
   const resume = useCallback(() => {
-    console.log("[PlayerContext] resume called");
     setIsPlaying(true);
   }, []);
 
   useEffect(() => {
-    console.log("[PlayerContext] currentTrack changed:", currentTrack);
+    // debug only
+    // console.log("[PlayerContext] currentTrack changed:", currentTrack);
   }, [currentTrack]);
 
   useEffect(() => {
-    console.log("[PlayerContext] audioUrl changed:", audioUrl);
+    // debug only
+    // console.log("[PlayerContext] audioUrl changed:", audioUrl);
   }, [audioUrl]);
 
   useEffect(() => {
-    console.log("[PlayerContext] isPlaying changed:", isPlaying);
     const audio = audioRef.current;
     if (!audio) return;
     if (isPlaying) {
       audio.play().catch((e) => {
-        console.warn("[PlayerContext] audio.play() error:", e);
+        // console.warn("[PlayerContext] audio.play() error:", e);
       });
     } else {
       audio.pause();
@@ -57,13 +66,14 @@ export function PlayerProvider({ children }) {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
-      console.log("[PlayerContext] Reset audio.currentTime due to audioUrl change");
+      // console.log("[PlayerContext] Reset audio.currentTime due to audioUrl change");
       audio.currentTime = 0;
     }
   }, [audioUrl]);
 
-  return (
-    <PlayerContext.Provider value={{
+  // value обернут в useMemo
+  const contextValue = useMemo(
+    () => ({
       currentTrack,
       isPlaying,
       playTrack,
@@ -71,14 +81,18 @@ export function PlayerProvider({ children }) {
       resume,
       audioRef,
       audioUrl,
-    }}>
+    }),
+    [currentTrack, isPlaying, playTrack, pause, resume, audioUrl]
+  );
+
+  return (
+    <PlayerContext.Provider value={contextValue}>
       {children}
       <audio
         ref={audioRef}
         src={audioUrl}
         style={{ display: "none" }}
         onEnded={() => {
-          console.log("[PlayerContext] Audio ended");
           setIsPlaying(false);
         }}
       />

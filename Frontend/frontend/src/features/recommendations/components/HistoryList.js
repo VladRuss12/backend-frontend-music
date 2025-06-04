@@ -4,16 +4,12 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MusicTable from "../../music/components/MusicTable";
 
-
 export default function HistoryList({ history, maxVisible = 5 }) {
   const [expanded, setExpanded] = useState(false);
 
-  // Извлекаем массив треков из поля media
+ 
   const historyTracks = useMemo(
-    () =>
-      history
-        ?.map(item => item.media)
-        .filter(Boolean) ?? [],
+    () => history?.map(item => item && item.media ? item.media : null).filter(Boolean) ?? [],
     [history]
   );
 

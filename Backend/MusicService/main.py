@@ -21,7 +21,7 @@ def create_app():
     app.register_blueprint(create_crud_routes(PlaylistService, "/music/playlists"))
     app.register_blueprint(create_crud_routes(TrackService, "/music/tracks"))
     app.register_blueprint(search_router, url_prefix='/music/search')
-    app.register_blueprint(batch_bp, url_prefix='/music')
+    app.register_blueprint(batch_bp)
 
 
     @app.cli.command("seed")

@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Card, CardMedia, CardContent, Typography, CardActionArea } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import placeholder from './placeholder.svg';
 import { useSelector, useDispatch } from "react-redux";
 import { getEntityById } from "../entitiesSlice";
-import { getPerformerName } from "../misc/musicUtils";
+import { getPerformerName } from "../misc/musicUtils.js";
 import { usePlayer } from "../context/PlayerContext"; 
 
 export default function MusicCard({ item, type }) {
@@ -15,7 +15,7 @@ export default function MusicCard({ item, type }) {
   );
   const { playTrack } = usePlayer?.() || {}; 
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (type === "track" && item.performer_id && !performersById[item.performer_id]) {
       dispatch(getEntityById({ entityType: "performers", id: item.performer_id }));
     }
@@ -39,7 +39,8 @@ export default function MusicCard({ item, type }) {
     to = `/performers/${item.id}`;
   }
 
-  const handleClick = () => {
+  const handleClick = (event) => {
+    event.preventDefault();
     if (type === "track" && playTrack) {
       playTrack(item);
     } else {
